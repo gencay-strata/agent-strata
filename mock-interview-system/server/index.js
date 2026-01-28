@@ -2,16 +2,25 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import fetch from 'node-fetch';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { getRandomQuestions, preloadQuestions } from './questionDatabase.js';
 import { callInterviewAgent } from './agentClient.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 const STRATA_MCP_URL = "https://api.stratascratch.com/mcp";
 
 app.use(cors());
 app.use(express.json());
+
+// Serve static files from React build (for production)
+const distPath = path.join(__dirname, '..', 'dist');
+app.use(express.static(distPath));
 
 // Helper function to safely parse JSON
 function tryParseJSON(jsonString) {
@@ -485,6 +494,12 @@ app.post('/api/agent/message', async (req, res) => {
   }
 });
 
+// Serve React app for all other routes (SPA fallback)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'));
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 MCP Backend Server running on http://localhost:${PORT}`);
+  console.log(`📁 Serving static files from: ${distPath}`);
 });
