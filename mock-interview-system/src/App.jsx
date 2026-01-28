@@ -1,42 +1,63 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './pages/Login';
+import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
 import LandingPage from './pages/LandingPage';
 import InterviewSession from './pages/InterviewSession';
 import Results from './pages/Results';
-import ProtectedRoute from './components/ProtectedRoute';
+
+const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+if (!clerkPubKey) {
+  throw new Error('Missing Clerk Publishable Key');
+}
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <LandingPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/interview"
-          element={
-            <ProtectedRoute>
-              <InterviewSession />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/results"
-          element={
-            <ProtectedRoute>
-              <Results />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </Router>
+    <ClerkProvider publishableKey={clerkPubKey}>
+      <Router>
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <>
+                <SignedIn>
+                  <LandingPage />
+                </SignedIn>
+                <SignedOut>
+                  <RedirectToSignIn />
+                </SignedOut>
+              </>
+            }
+          />
+          <Route
+            path="/interview"
+            element={
+              <>
+                <SignedIn>
+                  <InterviewSession />
+                </SignedIn>
+                <SignedOut>
+                  <RedirectToSignIn />
+                </SignedOut>
+              </>
+            }
+          />
+          <Route
+            path="/results"
+            element={
+              <>
+                <SignedIn>
+                  <Results />
+                </SignedIn>
+                <SignedOut>
+                  <RedirectToSignIn />
+                </SignedOut>
+              </>
+            }
+          />
+        </Routes>
+      </Router>
+    </ClerkProvider>
   );
 }
 

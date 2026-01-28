@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { UserButton, useUser } from '@clerk/clerk-react';
 import '../styles/Results.css';
 
 const Results = () => {
@@ -34,11 +35,7 @@ const Results = () => {
   const codeQuality = Math.min(10, Math.round(scoreOutOf10 * 0.95));
   const communication = Math.min(10, Math.round(scoreOutOf10 * 0.9));
 
-  const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('username');
-    navigate('/login');
-  };
+  const { user } = useUser();
 
   return (
     <div className="results-container">
@@ -56,10 +53,7 @@ const Results = () => {
             </nav>
           </div>
           <div className="navbar-right">
-            <span>{localStorage.getItem('username') || 'User'}</span>
-            <button onClick={handleLogout} className="register-btn" style={{border: 'none', cursor: 'pointer'}}>
-              Logout
-            </button>
+            <UserButton afterSignOutUrl="/" />
           </div>
         </div>
       </div>
