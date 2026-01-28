@@ -3,8 +3,10 @@
  * Connects to the StrataScratch MCP server
  */
 
-// Use local backend server to avoid CORS issues
-const BACKEND_URL = "http://localhost:3001";
+// Use local backend server in development, deployed backend in production
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || (
+  import.meta.env.PROD ? '' : 'http://localhost:3001'
+);
 
 class MCPClient {
   constructor() {
