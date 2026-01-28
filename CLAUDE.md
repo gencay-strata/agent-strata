@@ -10,11 +10,14 @@ This document (CLAUDE.md) contains technical implementation details for develope
 ## Architecture
 
 ### Tech Stack
-- **Frontend**: React + Vite (Port 3000)
-- **Backend**: Express.js (Port 3001)
+- **Frontend**: React + Vite
+- **Backend**: Vercel Serverless Functions (deployed)
+- **Authentication**: Clerk (modal-based sign-in/sign-up)
 - **AI Agent**: OpenAI Agents SDK with GPT-5.2
 - **Data Source**: StrataScratch MCP API + Local CSV (413k questions cached)
 - **Code Evaluation**: MCP Tools (run_code, check_solution, get_datasets_details)
+- **Hosting**: Vercel (https://vercel.com)
+- **Repository**: GitHub (https://github.com/gencay-strata/agent-strata)
 
 ### Project Structure
 ```
@@ -22,9 +25,10 @@ agent-strata/
 ├── mock-interview-system/
 │   ├── src/
 │   │   ├── pages/
-│   │   │   ├── LandingPage.jsx          # Start screen with filters
-│   │   │   ├── InterviewSession.jsx     # Main interview UI
-│   │   │   └── Results.jsx              # Post-interview summary
+│   │   │   ├── Home.jsx                 # Public landing page (StrataScratch-style)
+│   │   │   ├── LandingPage.jsx          # Interview setup (protected route)
+│   │   │   ├── InterviewSession.jsx     # Main interview UI (protected)
+│   │   │   └── Results.jsx              # Post-interview summary (protected)
 │   │   ├── components/
 │   │   │   ├── CodeEditor.jsx           # Monaco editor
 │   │   │   ├── ChatPanel.jsx            # AI chat interface
@@ -32,11 +36,17 @@ agent-strata/
 │   │   ├── services/
 │   │   │   └── mcpClient.js             # Backend API client
 │   │   └── styles/                      # CSS files
-│   └── server/
-│       ├── index.js                     # Express server
-│       ├── agentClient.js               # OpenAI Agents SDK client
-│       ├── questionDatabase.js          # CSV question cache
-│       └── .env                         # API keys (OPENAI_API_KEY)
+│   ├── api/                             # Vercel serverless functions
+│   │   ├── questions.js                 # POST /api/questions
+│   │   ├── agent-message.js             # POST /api/agent-message
+│   │   ├── run-code.js                  # POST /api/run-code
+│   │   ├── check-solution.js            # POST /api/check-solution
+│   │   └── dataset-details.js           # POST /api/dataset-details
+│   ├── server/
+│   │   ├── agentClient.js               # OpenAI Agents SDK client
+│   │   ├── questionDatabase.js          # CSV question cache
+│   │   └── .env                         # API keys (OPENAI_API_KEY)
+│   └── vercel.json                      # Vercel configuration
 ```
 
 ## Key Components
@@ -73,8 +83,8 @@ const mcp = hostedMcpTool({
 #### Architecture Flow
 ```
 Frontend (React)
-    ↓ POST /api/agent/message
-Backend (Express)
+    ↓ POST /api/agent-message
+Vercel Serverless Function
     ↓ callInterviewAgent()
 Agent Builder (OpenAI)
     ↓ hostedMcpTool
@@ -108,14 +118,19 @@ Database + Code Executor
 - **Location**: `server/questionDatabase.js`
 
 ### 3. Interview Flow
-1. **Landing Page** → User selects filters (SQL/Python, difficulty, company, duration)
-2. **Interview Session** → Questions displayed with:
+1. **Home Page (Public)** → StrataScratch-branded landing page
+   - Sign In / Sign Up buttons (Clerk modal)
+   - "Ace Interview Questions" CTA (navigates to /interview-setup)
+   - Stats display (1,000+ questions, 500K+ members)
+   - Company logos (FAANG, etc.)
+2. **Interview Setup (Protected)** → User selects filters (SQL/Python, difficulty, company, duration)
+3. **Interview Session (Protected)** → Questions displayed with:
    - Table schemas (fetched from MCP per question)
    - Sample data
    - Monaco code editor
    - Test/Submit buttons (routed through agent)
    - Chat panel for hints/questions
-3. **Results Page** → Score breakdown, percentile, time spent, question-by-question analysis
+4. **Results Page (Protected)** → Score breakdown, percentile, time spent, question-by-question analysis
 
 ### 4. Test Results Display
 - **Location**: Below code editor in InterviewSession
@@ -152,6 +167,9 @@ Database + Code Executor
 3. Display agent responses as plain markdown text
 4. Scope Results.css with `.results-container` prefix
 5. Check `testResults && testResults.output` before rendering panel
+6. Use `VITE_` prefix for environment variables (NOT `NEXT_PUBLIC_`)
+7. Protect routes with Clerk's `<SignedIn>` and `<SignedOut>` components
+8. Use modal mode for Clerk sign-in/sign-up buttons
 
 ### DON'T ❌
 1. Don't call MCP directly from frontend
@@ -159,24 +177,58 @@ Database + Code Executor
 3. Don't skip schema fetch on question changes
 4. Don't let Results.css affect InterviewSession navbar
 5. Don't create duplicate test result displays
+6. Don't use Express server in production (use Vercel serverless)
+7. Don't name serverless functions with slashes (use dashes: agent-message.js not agent/message.js)
+8. Don't add NEXT_PUBLIC_ variables to Vercel (this is a Vite project)
 
 ## Environment Variables
+
+### Local Development (.env)
 ```bash
 # server/.env
 OPENAI_API_KEY=sk-proj-...
 WORKFLOW_ID=wf_69785b59a66081908294851545870e8105ee6027e0451e3f
 WORKFLOW_VERSION=1
+
+# Frontend (.env in root)
+VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
 ```
 
-## Running the Project
-```bash
-# Terminal 1 - Backend
-cd mock-interview-system/server
-npm run dev
+### Vercel Production
+Set these environment variables in Vercel dashboard:
+- `OPENAI_API_KEY` - OpenAI API key for agent access
+- `WORKFLOW_ID` - Agent Builder workflow ID
+- `WORKFLOW_VERSION` - Workflow version (default: 1)
+- `VITE_CLERK_PUBLISHABLE_KEY` - Clerk publishable key (NOT NEXT_PUBLIC_)
 
-# Terminal 2 - Frontend
+## Running the Project
+
+### Local Development
+```bash
+# Frontend only (serverless functions run via Vercel CLI if needed)
 cd mock-interview-system
 npm run dev
+```
+
+### Production Deployment (Vercel)
+```bash
+# Build and deploy
+cd mock-interview-system
+npm run build
+git add . && git commit -m "Your commit message"
+git push origin main
+
+# Vercel auto-deploys from GitHub
+```
+
+### Testing Serverless Functions Locally
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Run dev server with serverless functions
+cd mock-interview-system
+vercel dev
 ```
 
 ## Recent Changes & Fixes
@@ -186,13 +238,20 @@ npm run dev
 4. ✅ Fixed null check for testResults rendering
 5. ✅ Added useEffect to fetch schema on question change
 6. ✅ Implemented agent response parsing (string vs object)
+7. ✅ Converted Express backend to Vercel serverless functions
+8. ✅ Integrated Clerk authentication (modal sign-in/sign-up)
+9. ✅ Created public Home page (StrataScratch-branded)
+10. ✅ Protected routes (/interview-setup, /interview, /results)
+11. ✅ Fixed API endpoint routing (agent-message vs agent/message)
+12. ✅ Deployed to Vercel production successfully
 
 ## Known Issues & TODOs
-- [ ] Custom interview button on landing page (filter validation)
-- [ ] Second question table schema (now fixed with useEffect)
 - [ ] Chat panel hint/question functionality
 - [ ] Real-time score calculation on Results page
 - [ ] Export/share results feature
+- [ ] Optimize CSV loading for serverless (413k questions may cause cold starts)
+- [ ] Add loading states for Clerk authentication
+- [ ] Implement user profile/history page
 
 ## Agent Instructions Summary
 The Interview Agent:
@@ -345,12 +404,16 @@ Action items or next steps
 
 ### Version Roadmap
 
-**V1 (Current)**:
-- ✅ Landing page with filters
+**V1 (Current - DEPLOYED)**:
+- ✅ Public home page (StrataScratch-style)
+- ✅ Clerk authentication (modal sign-in/sign-up)
+- ✅ Interview setup page with filters
 - ✅ Interview session with Test/Submit
 - ✅ Results page with scoring
 - ✅ OpenAI Agent Builder integration
 - ✅ MCP server integration
+- ✅ Vercel serverless deployment
+- ✅ GitHub repository (https://github.com/gencay-strata/agent-strata)
 
 **V2 (Future)**:
 - [ ] TTS voice interviewer (like IQ)
@@ -480,9 +543,75 @@ export async function callInterviewAgent({ message, context }) {
 - ✅ **Agent Builder + MCP**: Best of both worlds
 
 ## Contact & Resources
+- **Production URL**: [Your Vercel deployment URL]
+- **GitHub Repository**: https://github.com/gencay-strata/agent-strata
 - **OpenAI Agent Builder**: https://platform.openai.com/playground/agents
 - **Our Workflow**: wf_69785b59a66081908294851545870e8105ee6027e0451e3f
 - **StrataScratch MCP Docs**: https://api.stratascratch.com/mcp
-- **Project Repository**: /Users/learnai/Desktop/agent-strata
+- **Clerk Dashboard**: https://dashboard.clerk.com
+- **Local Project**: /Users/learnai/Desktop/agent-strata
 - **Trello Conversations**: /Users/learnai/Desktop/agent-strata/conversations.tex
 - **Team Slack**: StrataScratch workspace
+
+## Authentication System (Clerk)
+
+### Setup
+- **Provider**: Clerk (https://clerk.com)
+- **Integration**: `@clerk/clerk-react` package
+- **Sign-in Mode**: Modal (not redirect)
+- **Environment Variable**: `VITE_CLERK_PUBLISHABLE_KEY`
+
+### Implementation Details
+
+**App.jsx - Route Protection**
+```javascript
+import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
+
+<ClerkProvider publishableKey={clerkPubKey}>
+  <Router>
+    <Routes>
+      {/* Public route */}
+      <Route path="/" element={<Home />} />
+
+      {/* Protected routes */}
+      <Route path="/interview-setup" element={
+        <>
+          <SignedIn><LandingPage /></SignedIn>
+          <SignedOut><RedirectToSignIn /></SignedOut>
+        </>
+      } />
+    </Routes>
+  </Router>
+</ClerkProvider>
+```
+
+**Home.jsx - Conditional UI**
+```javascript
+import { UserButton, SignInButton, SignUpButton, SignedIn, SignedOut } from '@clerk/clerk-react';
+
+{/* Show for logged-out users */}
+<SignedOut>
+  <SignInButton mode="modal">
+    <button className="sign-in-btn">Sign In</button>
+  </SignInButton>
+  <SignUpButton mode="modal">
+    <button className="sign-up-btn">Sign Up</button>
+  </SignUpButton>
+</SignedOut>
+
+{/* Show for logged-in users */}
+<SignedIn>
+  <UserButton afterSignOutUrl="/" />
+</SignedIn>
+```
+
+### User Flow
+1. **Unauthenticated**: User sees public home page with "Sign In" and "Sign Up" buttons
+2. **Click CTA**: "Ace Interview Questions" button navigates to `/interview-setup`
+3. **Auth Check**: If not signed in, Clerk shows sign-in modal
+4. **Post-Auth**: After signing in, user accesses interview setup and can start practicing
+
+### Configuration in Vercel
+Add environment variable in Vercel dashboard:
+- Key: `VITE_CLERK_PUBLISHABLE_KEY`
+- Value: `pk_test_...` (from Clerk dashboard)
