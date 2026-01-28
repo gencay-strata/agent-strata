@@ -1,6 +1,7 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
+import Home from './pages/Home';
 import LandingPage from './pages/LandingPage';
 import InterviewSession from './pages/InterviewSession';
 import Results from './pages/Results';
@@ -16,8 +17,24 @@ function App() {
     <ClerkProvider publishableKey={clerkPubKey}>
       <Router>
         <Routes>
+          {/* Home page - StrataScratch landing */}
           <Route
             path="/"
+            element={
+              <>
+                <SignedIn>
+                  <Home />
+                </SignedIn>
+                <SignedOut>
+                  <RedirectToSignIn />
+                </SignedOut>
+              </>
+            }
+          />
+
+          {/* Interview setup page */}
+          <Route
+            path="/interview-setup"
             element={
               <>
                 <SignedIn>
@@ -29,6 +46,8 @@ function App() {
               </>
             }
           />
+
+          {/* Interview session */}
           <Route
             path="/interview"
             element={
@@ -42,6 +61,8 @@ function App() {
               </>
             }
           />
+
+          {/* Results page */}
           <Route
             path="/results"
             element={
