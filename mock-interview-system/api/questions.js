@@ -1,4 +1,4 @@
-import { getRandomQuestions, preloadQuestions } from '../questionDatabase.js';
+import { getRandomQuestions, preloadQuestions } from '../server/questionDatabase.js';
 
 // Helper function
 function tryParseJSON(jsonString) {

@@ -1,4 +1,4 @@
-import { callInterviewAgent } from '../agentClient.js';
+import { callInterviewAgent } from '../server/agentClient.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
