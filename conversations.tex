@@ -1,0 +1,752 @@
+Great work @mehmetgencayisik . I like the videos you sent.
+
+4 Mockups, 3 Agents
+
+Sounds good. In the testing, we should feed the values of the filters to the agents. In the video, you just sent the value of the ID. I know you’re just getting starting but when we do testing, we’ll start with the filters the users defined.
+
+Additionally, we may want a mock-up on how users will access their past scores on both the Mock Interview page and the Performance page.
+
+Platform Approach
+
+Agreed. Let’s test both infrastructures. For me the differentiator will be on how good the write-ups of the user’s weaknesses and strengths are, as well as being able to recommend practice questions and blog articles to users based on the results of their test.
+
+Do the agents also have access to the top user solutions for each question? Or do they only have access to our official solution? It’d be important to have access to the top user solutions so that the AI can be smarter about other possible solutions.
+
+I know we are giving users questions that they have not completed from our database, but I also think we should create an agent that can create questions from scratch based on the collection of questions we have and the user’s filter choices. Is this possible?
+
+Testing Plan
+
+Sounds like a good plan.
+
+Data Flow
+
+No blockers. Let’s get started.
+
+
+Reply
+
+Mehmet Gencay Isik Jan 21, 2026, 6:12 PM
+@nathanrosidi ,
+
+Here's my build plan based on the approved mockups.
+
+4 Mockups, 3 Agents
+
+Landing Page → No agent needed, just filtering UI
+
+Interview Session → Interview Agent (presents questions, handles clarifying questions, scores code)
+
+Results/Assessment → Review Agent (generates detailed AI feedback with code examples)
+
+Performance Tracking → Performance Agent (analyzes weak areas, recommends practice)
+
+Platform Approach
+
+I'll use both Vertex and OpenAI Agent Builder and test which works better for each task.
+
+Since Vertex supports the Claude API, complex tasks like code evaluation might perform better there.
+
+But I don't want to set aside the power of ChatGPT either - that's why my plan is to cross-build and compare.
+
+Testing Plan
+
+My idea is to connect the agents I build directly into the Artifacts for testing with a proper UI. I believe this can be done via API calls.
+
+I know Maks will handle the final frontend, but we need to test with a good UI before handoff.
+
+If the Artifact integration doesn't work, I can quickly build a test interface using Claude Code - it's fast for simple systems.
+
+Data Flow
+
+All agents share data via the MCP server (already tested and working).
+
+Interview Agent output → Review Agent → Performance Agent aggregates history.
+
+I can start immediately. Any blockers on your end?
+
+Also, today I’ve tested both Vertex + Claude ( inside streamlit) and OpenAI Agent Builder.
+
+Here are the links to the screen video for them;
+
+Streamlit + Vertex + Claude API : Streamlit + Vertex + Claude — Screen Studio
+
+OpenAI Agent Builder:  OpenAI Agent Builder — Screen Studio
+
+
+Edit
+•
+Add link as attachment
+•
+Delete
+
+StrataScratch Jan 20, 2026, 6:53 PM
+Thanks @mehmetgencayisik . Sounds good! Exciting work. We’ll be happy to test the features in an interative way, so let’s roll them out one by one so we can test continuously.
+
+
+1
+
+Reply
+
+Mehmet Gencay Isik Jan 19, 2026, 11:35 AM
+Thanks @nathanrosidi ,
+
+Since you and Anna approved the UI mockups, I'm now planning where to start building this agent. There are a lot of features to coordinate.
+
+The platform will likely be either Vertex or OpenAI, so let me map out the build sequence, and I'll update you once I have a clear plan.
+
+
+Edit
+•
+Delete
+
+StrataScratch Jan 14, 2026, 8:13 PM
+Looks great @mehmetgencayisik . No other edits on my end. Looks like Anna also gave the thumbs up.
+
+
+Reply
+
+Mehmet Gencay Isik Jan 14, 2026, 4:37 PM
+Landing Page
+@nathanrosidi
+
+The advanced options should only have premium options, which is the company-specific filter. Did we decide on other advanced options?
+
+The rest should be drop-downs in the Current Settings section
+
+I like the Interview Types section at the bottom
+
+@annabalatska
+
+The only comment I have is that on Landing page when a company is selected in filters, the warning about it’s being a premium feature appears too low. I’d place it right after Advanced options.
+
+Of course, I updated based on your comments.
+
+Mock Interview Practice Tool for Data Science Jobs
+
+Interview Session Page
+I love this UI! My only suggestion would be to make the default of the suggestion clarifying questions as collapsed. Just in case users don’t want to see them and make the interview experience as real as possible
+
+Done, here is the updated version:
+
+SQL Mock Interview Platform with Live Code Editor
+
+Love this one. No changes requested.
+
+Wonderful.
+
+Love it too. We’ll need to integrate it into our current Performance page but I like this as it is.
+
+Great.
+
+
+2
+
+Edit
+•
+Add link as attachment
+•
+Delete
+
+StrataScratch Jan 14, 2026, 6:56 AM
+Agreed @annabalatska !
+
+cc @mehmetgencayisik
+
+
+Reply
+
+Anna Balatska Jan 13, 2026, 10:03 PM
+@nathanrosidi @mehmetgencayisik
+Totally agree, everything looks amazing! The only comment I have is that on Landing page when a company is selected in filters, the warning about it’s being a premium feature appears too low. I’d place it right after Advanced options.
+
+
+1
+
+Reply
+•
+Add link as attachment
+
+StrataScratch Jan 13, 2026, 7:18 PM
+@mehmetgencayisik great work! I have a few tweaks but nothing major. @annabalatska can you take a look and let me know if you have any tweaks?
+
+Landing Page: 
+Mock Interview Practice Tool for Data Science Jobs
+
+The advanced options should only have premium options, which is the company-specific filter. Did we decide on other advanced options?
+
+The rest should be drop-downs in the Current Settings section
+
+I like the Interview Types section at the bottom
+
+Interview Session Page: 
+SQL Mock Interview Platform with Live Code Editor
+
+I love this UI! My only suggestion would be to make the default of the suggestion clarifying questions as collapsed. Just in case users don’t want to see them and make the interview experience as real as possible
+
+Results/Assessment Page: 
+Interview Results Dashboard - AI-Powered Code Review
+
+Love this one. No changes requested.
+
+Performance Tracking Page: 
+Interview Performance Dashboard - Track Your Progress
+
+Love it too. We’ll need to integrate it into our current Performance page but I like this as it is.
+
+
+Reply
+•
+Add link as attachment
+
+Mehmet Gencay Isik Jan 13, 2026, 4:56 PM
+@nathanrosidi
+
+Here are the 4 UI mock-ups created with Claude Artifacts:
+
+Landing Page: 
+Mock Interview Practice Tool for Data Science Jobs
+
+Interview Session Page: 
+SQL Mock Interview Platform with Live Code Editor
+
+Results/Assessment Page: 
+Interview Results Dashboard - AI-Powered Code Review
+
+Performance Tracking Page: 
+Interview Performance Dashboard - Track Your Progress
+
+All designs follow StrataScratch's existing UI style. Let me know if you'd like any changes.
+
+
+Edit
+•
+Add link as attachment
+•
+Delete
+
+StrataScratch Jan 8, 2026, 6:16 PM
+Thanks @mehmetgencayisik I’ve added some comments for you but all in all it looks like a good start.
+
+
+Reply
+
+Mehmet Gencay Isik Jan 6, 2026, 5:18 PM
+@nathanrosidi ,
+
+Here is the link to the Mock Interview Framework document: Mock Interview Framework
+
+
+Edit
+•
+Add link as attachment
+•
+Delete
+
+StrataScratch Dec 30, 2025, 8:14 PM
+That’s perfect @mehmetgencayisik . Let’s also share with Sergey and Maks since they will be building out the backend and frontend. We will be the product managers and the data scientist in this build out.
+
+
+1
+
+Reply
+
+Mehmet Gencay Isik Dec 30, 2025, 11:54 AM (edited)
+Thanks @nathanrosidi ,
+
+I read your message from slack too. I started working on the Google Doc today.
+
+It will include what contents we want to put into the feature before mocking up a UI.
+
+
+1
+
+Edit
+•
+Delete
+
+StrataScratch Dec 29, 2025, 10:31 PM
+@mehmetgencayisik here’s what I put on your Slack message too:
+
+I left a bunch of questions on the trello card. You can review and continue with finalizing the framework on how the mock interviews will work. I think what I will want to understand is the full end-to-end mock-up on the Mock Interview feature. This can be done on gSlides or gDocs, whichever you prefer.
+
+But I’d like to understand what the first thing a user will see when they go to the Mock Interview feature. (1) What will the UI look like? (2) What are the user’s CTA and advance filters?
+
+Then what will the UI of the interview look like? Will it be different than our main platform? How do users submit questions? How do users test questions? What output would they be seeing?How will the outputs be different than our regular platforms?
+
+Then what will the evaluation/results page look like? What information will be included?
+
+And lastly, how do we log this information? How do we display it on our Performance page?
+
+You’ll need to create UIs with Claude or OpenAI. But the UI decision should come last. We should know what contents we want to put into the feature before mocking up a UI (for example, the results/assessment and what filters we want to present to the user first).
+
+Take a look at this feature build out Create comprehensive SQL learning path
+Approved For Release
+ . We have a gDoc with the framework of what we will be building with most of the logic/values finalized. I have just approved it and now Anna will be building out the content. I would expect similar from you. On gSlides or gDoc, let’s map out the start-to-finish of the mock interview experience with all the options and content the user will see. Then we can do the UI mock-up and then fill out and map out all the content in its entirety.
+
+Then in terms of UI mock-up, take a look at our redesign of  our home page (Update home page to reflect new products
+Approved For Release
+ ). Anna mocked it up using Claude.
+
+
+1
+
+Reply
+•
+Add link as attachment
+
+StrataScratch Dec 29, 2025, 10:15 PM
+@mehmetgencayisik last post
+
+4. Assessment & Scoring
+Agree on providing both visual and text assessments in the similar way IQ does it.
+
+ 
+
+You mentioned IQ a lot compared to LC. Was IQ a lot better?
+
+ 
+
+Next Action items
+
+Let’s finalize the quick start and advanced filters
+
+Let’s finalize what the evaluation assessment will look like
+
+Let’s start to map how we want to limit questions based on the advanced filters
+
+Let’s integrate the MCP with Google and OpenAI and test which one you like best.
+
+
+Reply
+
+StrataScratch Dec 29, 2025, 10:12 PM (edited)
+@mehmetgencayisik Adding more comments because I think my original post was too long to fit in one posting.
+
+2. Mock Interview Flow
+Time limit and number of questions should change based on the Interview Type selected.
+
+After each question is submitted, the solution should be scored immediately.
+
+Users should be able to test their code (run without scoring) and submit (official evaluation) separately, like in both Leetcode and Interview query.
+
+Agree on these 3
+
+ 
+
+Also, regarding question selection, I think we should define the questions based on the filters selected rather than using top upvoted questions. Upvoted questions might be popular for practice, but for a realistic mock interview, the questions should match the user's selected position, company, and interview type - not what other users found interesting.
+
+Yes, we select the questions based off the filters the users choose and based off of the questions they have already answered in their history. We don’t want them to get the same question that they have already answered.
+
+3. TTS Integration (Voice Feature)
+It would be amazing if we could integrate real-time TTS so the AI interviewer can actually speak to the user (like IQ does).
+
+Agree. This will be v2.
+
+
+Reply
+
+StrataScratch Dec 29, 2025, 10:09 PM
+@mehmetgencayisik
+
+Great work. I think we have a good understanding of what to do next. Here’s my comments below:
+
+1. User Selections (Quick Start + Advanced Options)
+Filters:
+
+Language: Python, R, SQL
+
+Job Position: Data Scientist, Data Analyst, Analytics Engineer, Product Analyst, ML Engineer
+
+Should we also add AI-related roles like Prompt Engineer? These are highly popular right now and could attract more users.
+
+Yes, agree on adding AI-related roles. How many are there besides Prompt Engineer?
+
+What would we ask them? What are some interview questions related to prompt engineering? I wouldn’t add them for v1 since we don’t have the questions yet. But in the future, this is important to add because AI roles are increasing.
+
+ 
+
+Company Specific: Google, Meta, Amazon, etc. (Premium feature as @‌nathanrosidi suggested)
+
+@annabalatska what’s your decision on adding company type? I think it would be good to add a filter that groups the specific companies, especially if we don’t have their specific company or we don’t have many questions for that specific company.
+
+Interview Type: Coding, Soft Skills, Phone Interview, On-site Interview
+
+What is a phone interview vs on-site interview? How do the questions differ? How do they differ between coding and soft skills?
+
+
+Reply
+
+StrataScratch Dec 29, 2025, 9:45 PM
+Thanks @annabalatska
+
+Yes, junior/mid/senior makes sense for mock interviews, but for learning paths, I was thinking of using skill level as a starting point for the path and naming it beginner/intermediate/advanced or easy/medium/hard. My logic is that learning advanced SQL alone doesn’t make someone senior, but for a technical interview for a senior position, it does make sense.
+
+Agree with this.
+
+
+Reply
+
+Anna Balatska Dec 29, 2025, 3:36 PM
+@nathanrosidi
+
+what’s the difference between a Data Analyst and a Analyst Engineer?
+
+An Analytics Engineer sits somewhere between a Data Analyst and a Data Engineer.
+
+Think of it like this:
+
+Data Engineer → raw data & ingestion
+Analytics Engineer → transformations & metrics
+Data Analyst / Product Analyst → insights
+
+Skills: advanced SQL (heavy on window functions and CTEs), data modeling, and Python.
+
+Skill leve should be Junior Data Scientist, Data Scientist, Senior Data Scientist. Something like this
+
+Yes, junior/mid/senior makes sense for mock interviews, but for learning paths, I was thinking of using skill level as a starting point for the path and naming it beginner/intermediate/advanced or easy/medium/hard. My logic is that learning advanced SQL alone doesn’t make someone senior, but for a technical interview for a senior position, it does make sense.
+
+
+Reply
+
+Mehmet Gencay Isik Dec 29, 2025, 2:19 PM
+@nathanrosidi ,
+
+Thanks, everyone, for the detailed discussion.
+
+I finished testing Interview Query and LeetCode today. Here are the notion pages includes my review.
+
+Interview Query
+
+Leet Code
+
+Here are my thoughts;
+
+1. User Selections (Quick Start + Advanced Options)
+The session should be able to start directly with default settings.
+
+https://trello.com/1/cards/66fdb875390054ef6e27e92e/attachments/69525f570dc01256dbbd2637/download/Screenshot_2025-12-29_at_14.00.35.png
+But when the user clicks "Advanced Options, the filters expand (similar to how IQ does it).
+
+https://trello.com/1/cards/66fdb875390054ef6e27e92e/attachments/69525f73e93bd46b1882658c/download/Screenshot_2025-12-29_at_14.01.02.png
+Filters:
+
+Language: Python, R, SQL
+
+Job Position: Data Scientist, Data Analyst, Analytics Engineer, Product Analyst, ML Engineer
+
+Should we also add AI-related roles like Prompt Engineer? These are highly popular right now and could attract more users.
+
+Company Specific: Google, Meta, Amazon, etc. (Premium feature as @‌nathanrosidi suggested)
+
+Interview Type: Coding, Soft Skills, Phone Interview, On-site Interview
+
+2. Mock Interview Flow
+Time limit and number of questions should change based on the Interview Type selected.
+
+After each question is submitted, the solution should be scored immediately.
+
+Users should be able to test their code (run without scoring) and submit (official evaluation) separately, like in both Leetcode and Interview query.
+
+Also, regarding question selection, I think we should define the questions based on the filters selected rather than using top upvoted questions. Upvoted questions might be popular for practice, but for a realistic mock interview, the questions should match the user's selected position, company, and interview type - not what other users found interesting.
+
+3. TTS Integration (Voice Feature)
+It would be amazing if we could integrate real-time TTS so the AI interviewer can actually speak to the user (like IQ does).
+
+https://trello.com/1/cards/66fdb875390054ef6e27e92e/attachments/6952602be50268c6e15abf3a/download/Screenshot_2025-12-29_at_14.04.06.png
+This makes it feel more like a real interview.
+
+Screen recording of this.
+
+However, TTS can be pricey. I suggest we limit this feature to higher plans:
+
+4. Assessment & Scoring
+After all questions are finished, there should be a comprehensive assessment:
+
+a) Visual Dashboard
+
+A visual representation of performance (similar to how IQ does it).
+
+https://trello.com/1/cards/66fdb875390054ef6e27e92e/attachments/6952608c3a4383029d91c870/download/Screenshot_2025-12-29_at_14.05.41.png
+b) Text Review
+
+Written feedback for each question:
+
+What was done well
+
+What could be improved
+
+Specific recommendations
+
+This addresses @nathanrosidi 's  point about AI writing a review of the user's answers.
+
+https://trello.com/1/cards/66fdb875390054ef6e27e92e/attachments/695260bf18f2b991f32180ed/download/Screenshot_2025-12-29_at_14.06.32.png
+Questions
+ 
+
+@nathanrosidi  - Do you think we should include popular AI-related job titles? (Prompt Engineer, AI Engineer)
+
+We could also add their questions as non-coding questions to our platform. Prompting is really popular right now - even some full-stack developer assessments now include prompting sections to test your vibe coding skills.
+
+@sergey_at_stratascratch  - For me to test how to start implementing any of these features to begin with, can you or Maks connect our MCP servers with agent builder of OpenAI - OpenAI Platform .  And if possible, with Google’s Vertex? So I can test them by accessing Strata’s data and answer your questions in here.
+
+
+Edit
+•
+Add link as attachment
+•
+Delete
+
+StrataScratch Dec 27, 2025, 2:02 AM
+Thanks @annabalatska . @mehmetgencayisik here are my opinions to Anna’s comments.
+
+You could consider difficulty progression within a session, starting with easy questions and moving to harder ones.
+
+Agree with concept but we should probably start with at least a medium level question. We should confirm to see what LC and IQ does to make sure we understand how they’re conducting mock interviews.
+
+About avoiding repeat questions, would you exclude questions already solved on the platform, or only those used in previous interview sessions?
+
+I think both whenever possible.
+
+In the code editor, can the user test their ideas, or will everything be evaluated by the AI interviewer?
+
+Let’s see what LC and IQ does. But I don’t think everything needs to be evaluated. The user might want to just submit their official solution after they test a few of their ideas out.
+
+The filters in learning paths aren't finalized yet, I'll update here once they are. But here's what we have so far:
+
+Job Position Filter: Data Analyst, Data Scientist, Analytics Engineer, Product Analyst, ML Engineer
+
+I like these job titles. @annabalatska what’s the difference between a Data Analyst and a Analyst Engineer?
+
+Other Filters:
+
+Company
+
+SQL dialect (although this could be auto-selected based on company)
+
+Skill Level
+
+The interviews I’ve been to allow for any SQL dialect to be used. This is because no company I’ve interviewed for has had a real DB engine to execute code. We could let the user choose whatever language they are comfortable writing in. They can even select python if they want.
+
+Skill leve should be Junior Data Scientist, Data Scientist, Senior Data Scientist. Something like this @annabalatska ?
+
+Also, Company could be both Company Type and/or Company. The Company Type is a grouping of similar companies like FAANG. While Company is a specific company. We should make Company premium while I think it’s fine to have Company Type a freemium option. But we can worry about freemium vs premium at a later time.
+
+@mehmetgencayisik do you have everything you need from me, Anna, and Sergey to get started?
+
+
+Reply
+
+Sergey Parkhomenko Dec 26, 2025, 5:27 PM
+@nathanrosidi
+
+@sergey_at_stratascratch the actual integration of the agent into our platform seems pretty easy. Basically just create the agent and give it to Maks to integrate some data pipelines in the backend to feed into the agent and then frontend to display the interview. Is that really it? Or is it more complicated?
+
+yes but with on more thing. I am rolling out Strata Scratch MCP server to production now so that Gencay has easy integration with Questions retrieval and Run Code / Solution Checker functionality.
+
+
+Reply
+
+Anna Balatska Dec 25, 2025, 6:20 PM
+@sergey_at_stratascratch @nathanrosidi @mehmetgencayisik I agree with everything said before. Just a few more ideas/questions:
+
+You could consider difficulty progression within a session, starting with easy questions and moving to harder ones.
+
+About avoiding repeat questions, would you exclude questions already solved on the platform, or only those used in previous interview sessions?
+
+In the code editor, can the user test their ideas, or will everything be evaluated by the AI interviewer?
+
+The filters in learning paths aren't finalized yet, I'll update here once they are. But here's what we have so far:
+
+Job Position Filter: Data Analyst, Data Scientist, Analytics Engineer, Product Analyst, ML Engineer
+
+Other Filters:
+
+Company
+
+SQL dialect (although this could be auto-selected based on company)
+
+Skill Level
+
+
+Reply
+
+StrataScratch Dec 24, 2025, 9:39 PM
+Thanks @sergey_at_stratascratch . I agree with this, with some minor tweaks.
+
+ 
+
+@sergey_at_stratascratch @mehmetgencayisik see below:
+
+User selects a position from pre-selected list. Example:
+
+Junior Data Scientist
+
+Data Scientist
+
+Senior Data Scientist
+
+Let’s match our filters with Learning Paths. We currently have job position (DA, DS, etc), and company type. We can have more filters like company-specific (this is what LC does to make it a premium offering), and level of expertise like junior, senior, etc. @annabalatska can help you with what our learning paths are.
+
+But for now, we can keep it simple and just do job position, company type,  company-specific, and interview type (I would imagine that some users just want a mock interview for coding, while others might want a complete interview (coding + non-coding questions). LC categorizes this by phone interview, on-site interview, etc. I dont' want the same category names so we’ll need to figure out what makes sense for us. For now I’m thinking of something simple like , coding interview and full interview which includes both coding and non-coding questions.
+
+We can add data projects in a later version. We need to first create an agent that reviews and grades data projects to get this going so it won’t be part of our initial release. @sergey_at_stratascratch just something to think about for the future roadmap.
+
+ 
+
+Every session is limited by 1 hour.
+
+There are X pre-selected questions for the session depending on Selected Position.
+
+Agreed, LC does 1 hr interviews too, so let’s do that. Give the user 2-3 questions.
+
+One thing to watch out for is whether or not the user has already completed that question. We would need to feed the agent the user’s past history so we don’t give the users questions they have already solved.
+
+We score every question.
+
+We score overall interview.
+
+@mehmetgencayisik I’d score it similar to how LC scores it. Also take a look at IQ and see how they score questions and interviews.
+
+@sergey_at_stratascratch the actual integration of the agent into our platform seems pretty easy. Basically just create the agent and give it to Maks to integrate some data pipelines in the backend to feed into the agent and then frontend to display the interview. Is that really it? Or is it more complicated?
+
+@mehmetgencayisik next steps
+
+Come up with the specific filters for users to choose their interviews
+
+Come up with the dataset that the agent needs. For example, the agent will need the questions, solutions, company, difficulty, user’s past history, etc. Should we also include the top 3 more upvoted solutions from other users too? We should finalize what the data pipeline looks like that feeds the agent.
+
+Scoring/grading the interview – how should we do this? In addition to numeric scores like 99 percentile or 100% correct, I would also want the agent to write a review of the user’s answers. For example, what was great about their approach/code? What could be better? Not sure if IQ or LC does this but this would be a perfect use case for AI.
+
+@mehmetgencayisik @sergey_at_stratascratch @annabalatska thoughts?
+
+
+Reply
+
+Sergey Parkhomenko Dec 24, 2025, 5:35 PM
+I suggest it this way:
+
+User selects a position from pre-selected list. Example:
+
+Junior Data Scientist
+
+Data Scientist
+
+Senior Data Scientist
+
+Mock Interview is a chatbot where interviewer is an AI and interviewee is a real person.
+
+Interview chatbot runs in sessions.
+
+Every session is limited by 1 hour.
+
+There are X pre-selected questions for the session depending on Selected Position.
+
+For every Xi question from AI gives a problem to solve. Then AI interface splits into the chat and code editor.
+
+In Code Editor user writes a solution. In Chat user describes approach to the solution (like in a real interview).
+
+We score every question.
+
+We score overall interview.
+
+@nathanrosidi @mehmetgencayisik @annabalatska does it make sense?
+
+Technical details:
+
+AI Agent is developed in OpenAI Agent Builder or Google Vertex (https://stratascratch-group.slack.com/archives/C02S66YMW3C/p1766490589870949Connect your Slack account )
+
+AI Agent is integrated with Code Checker and Questions database via MCP server.
+
+AI Agent has separate frontend for flexibility, with shared authentication with the platform (same as StrataTools)
+
+
+Reply
+•
+Add link as attachment
+
+StrataScratch Dec 24, 2025, 12:12 AM
+Yes I agree @mehmetgencayisik It will require an understanding of not only the data we will give the agent (like questions and solutions) but more importantly the meta data like job position, topic family/function, etc so that the agent knows what question to give based on the user’s request.
+
+
+1
+
+Reply
+
+Mehmet Gencay Isik Dec 23, 2025, 1:00 PM
+Thanks @nathanrosidi ,
+
+I think my task is to define the elements that will be on the frontend and the prompts that the agent will digest, right?
+Of course, after doing research, based on our conversation over slack.
+
+
+Edit
+•
+Delete
+
+StrataScratch Dec 23, 2025, 12:16 AM
+Thanks @sergey_at_stratascratch . Based on our conversation today, we will not put this on StrataTools but we will integrate it into our platform.stratascratch.com.
+
+We’ll use @mehmetgencayisik agent as an engine and we will have Maks connect it to the backend and fronten so that it can grab questions, use the solution checker, and track the progress of the mock interview.
+
+
+1
+
+Reply
+•
+Add link as attachment
+
+Mehmet Gencay Isik Dec 22, 2025, 5:01 PM
+Thanks @sergey_at_stratascratch !
+
+
+Edit
+•
+Delete
+
+Sergey Parkhomenko Dec 22, 2025, 4:46 PM
+Will share today. I was focused on Pricing refactor until now. From today my full focus is on the agents platform. Will send you guide today.
+
+
+Reply
+
+Mehmet Gencay Isik Dec 22, 2025, 10:18 AM
+@sergey_at_stratascratch ,
+
+When you have a moment, could you share which Google platform we should target and whether there are any architecture preferences, because my plan is to start building this week.
+cc @nathanrosidi
+
+
+Edit
+•
+Delete
+
+StrataScratch Dec 16, 2025, 8:03 PM
+@sergey_at_stratascratch to give more information – we’re going to build an agent to help with Mock Interviews. We will release it in both StrataTools and in our Interview Questions platform.
+
+Where do we build our agent? You had mentioned we’re going towards the Google infra. When will that be ready for Gencay to start building?
+
+
+Reply
+
+Mehmet Gencay Isik Dec 16, 2025, 9:59 AM
+Hi @sergey_at_stratascratch
+
+I'll be starting work on the Mock Interviews agent, and @nathanrosidi mentioned we should collaborate with you on the platform choice before building anything.
+
+I understand you're planning to transition to Google infra. Could you share some guidance on:
+
+Which Google platform/tools should I build this agent on?
+
+Any specific frameworks or architecture preferences you have in mind?
+
+Nate asked to be included in this conversation as well, so I'm looping him in.
+
+cc @nathanrosidi
+
+
+Edit
+•
+Delete
+
+StrataScratch added this card to Epics Backlog
+Oct 3, 2024, 12:17 AM
