@@ -34,6 +34,12 @@ const Results = () => {
   const codeQuality = Math.min(10, Math.round(scoreOutOf10 * 0.95));
   const communication = Math.min(10, Math.round(scoreOutOf10 * 0.9));
 
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('username');
+    navigate('/login');
+  };
+
   return (
     <div className="results-container">
       {/* Navigation Bar */}
@@ -50,8 +56,10 @@ const Results = () => {
             </nav>
           </div>
           <div className="navbar-right">
-            <span>Login</span>
-            <span className="register-btn">Register</span>
+            <span>{localStorage.getItem('username') || 'User'}</span>
+            <button onClick={handleLogout} className="register-btn" style={{border: 'none', cursor: 'pointer'}}>
+              Logout
+            </button>
           </div>
         </div>
       </div>
