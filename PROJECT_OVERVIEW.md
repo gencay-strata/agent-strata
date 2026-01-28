@@ -8,8 +8,22 @@ We created a **full-featured mock interview platform** where data science candid
 
 ## The Complete User Journey
 
-### 1. **Landing Page** (Home Screen)
-When users arrive, they see a clean interface where they can customize their interview:
+### 1. **Home Page** (Public Landing)
+When users first visit, they see a beautiful StrataScratch-branded landing page:
+
+- **Hero Section**: "Master Data Skills Through Practice"
+- **Stats Display**: 1,000+ questions, 500K+ members, 200+ companies
+- **Call-to-Action Buttons**:
+  - 🎯 Ace Interview Questions (navigates to interview setup)
+  - 📊 Build Portfolio
+  - 🔮 Try AI StrataTools
+- **Company Logos**: FAANG and other top tech companies
+- **Sign In / Sign Up**: Modal-based authentication (no page reload)
+
+**Note**: The home page is public - no login required to browse.
+
+### 2. **Interview Setup Page** (Protected - Login Required)
+After clicking "Ace Interview Questions" and signing in, users customize their interview:
 
 - **Choose a programming language**: SQL, Python, or R
 - **Select their role**: Data Analyst, Data Scientist, ML Engineer, etc.
@@ -20,7 +34,7 @@ When users arrive, they see a clean interface where they can customize their int
 
 Once they hit "Start Interview," the system instantly loads questions matching their criteria.
 
-### 2. **Interview Session** (Main Experience)
+### 3. **Interview Session** (Main Experience - Protected)
 This is where the magic happens. The screen is split into sections:
 
 **Left Side - The Problem:**
@@ -52,7 +66,7 @@ This is where the magic happens. The screen is split into sections:
 - Current question number (Question 1 of 3)
 - "Next Question" and "Submit Interview" buttons
 
-### 3. **Results Page** (Final Report)
+### 4. **Results Page** (Final Report - Protected)
 After submitting all questions, users see a comprehensive performance dashboard:
 
 **Overall Score:**
@@ -93,16 +107,19 @@ After submitting all questions, users see a comprehensive performance dashboard:
 **Three Main Parts:**
 
 1. **Frontend (What Users See)**
-   - Built with React (modern web framework)
+   - Built with React + Vite (modern web framework)
    - Beautiful, responsive design
    - Works on desktop and mobile
    - Instant updates without page refreshes
+   - **Authentication**: Clerk (modal sign-in/sign-up)
+   - **Hosting**: Vercel (production deployment)
 
-2. **Backend (The Server)**
-   - Node.js/Express server
-   - Loads 413,000+ questions from a database file
+2. **Backend (Serverless Functions)**
+   - Vercel serverless functions (deployed in cloud)
+   - Loads questions from a database file
    - Routes requests between frontend and AI
    - Handles all the heavy lifting
+   - **No traditional server needed** - scales automatically
 
 3. **AI Agent (The Smart Part)**
    - OpenAI Agent Builder workflow
@@ -136,42 +153,61 @@ Instead of writing complex logic ourselves, we use **OpenAI Agent Builder**:
 
 ## Key Features We Implemented
 
-### ✅ Core Features (V1 - Current)
+### ✅ Core Features (V1 - DEPLOYED TO PRODUCTION)
 
-1. **Smart Question Selection**
+1. **Public Landing Page**
+   - StrataScratch-branded home page
+   - No login required to browse
+   - Clear call-to-action buttons
+   - Company logos and trust indicators
+   - Stats showcase (1,000+ questions, 500K+ members)
+
+2. **User Authentication**
+   - Clerk authentication integration
+   - Modal-based sign-in/sign-up (no page redirects)
+   - User profile with logout functionality
+   - Protected routes for interview features
+
+3. **Smart Question Selection**
    - Filters by language, difficulty, company, role
    - Never repeats questions you've solved
    - Instant loading (questions pre-cached)
 
-2. **Real-Time Code Testing**
+4. **Real-Time Code Testing**
    - Test your code unlimited times before submitting
    - See actual query results in formatted tables
    - Clear error messages when something breaks
    - No penalty for testing
 
-3. **AI-Powered Grading**
+5. **AI-Powered Grading**
    - Submitting officially grades your solution
    - Get scored on correctness
    - Receive feedback on what to improve
    - Hints for getting it right (if wrong)
 
-4. **Live AI Interviewer**
+6. **Live AI Interviewer**
    - Chat with the agent anytime during interview
    - Ask for hints or clarification
    - Get strategic guidance without spoilers
    - Professional, concise responses
 
-5. **Comprehensive Results Dashboard**
+7. **Comprehensive Results Dashboard**
    - Visual score breakdown
    - Percentile ranking
    - Time efficiency analysis
    - Question-by-question review
 
-6. **Professional UI/UX**
+8. **Professional UI/UX**
    - Clean, modern design matching StrataScratch branding
    - Intuitive navigation
    - Responsive layout
    - Smooth animations
+
+9. **Production Deployment**
+   - Hosted on Vercel (serverless architecture)
+   - GitHub repository for version control
+   - Environment variables secured
+   - Auto-deploy on git push
 
 ### 🚧 Planned Features (V2 - Future)
 
@@ -197,47 +233,85 @@ We went to OpenAI Agent Builder and:
 
 The workflow got an ID: `wf_69785b59a66081908294851545870e8105ee6027e0451e3f`
 
-### 2. Built the Backend Server
+### 2. Built the Backend (Serverless Architecture)
 
-- Installed necessary packages (@openai/agents, express, cors)
+**Initial Development:**
+- Built Express.js server for local testing
 - Created API endpoints for the frontend to call
 - Integrated the OpenAI agent using their SDK
 - Loaded all questions into memory for fast filtering
-- Set up environment variables (API keys, workflow ID)
 
-### 3. Created the React Frontend
+**Production Conversion:**
+- Converted Express endpoints to Vercel serverless functions
+- Created `/api` directory with individual function files
+- Each endpoint became a standalone serverless function
+- Set up environment variables in Vercel dashboard
 
-**Landing Page:**
+### 3. Integrated User Authentication
+
+- Set up Clerk account and application
+- Installed `@clerk/clerk-react` package
+- Wrapped app with `ClerkProvider`
+- Protected routes using `<SignedIn>` and `<SignedOut>` components
+- Added modal sign-in/sign-up buttons
+- Configured `VITE_CLERK_PUBLISHABLE_KEY` environment variable
+
+### 4. Created the React Frontend
+
+**Home Page (Public):**
+- StrataScratch-branded landing page
+- Hero section with stats
+- CTA buttons
+- Company logos
+- Conditional sign-in/sign-up buttons
+
+**Interview Setup Page (Protected):**
 - Filter selection UI
 - Start button with validation
 
-**Interview Session:**
+**Interview Session (Protected):**
 - Question display area
 - Monaco code editor
 - Test results panel
 - Chat interface
 - Timer and navigation
 
-**Results Page:**
+**Results Page (Protected):**
 - Score visualization
 - Performance charts
 - Question summary
 - Action buttons
 
-### 4. Styled Everything
+### 5. Styled Everything
 
 - Created CSS files for each page
 - Used StrataScratch color scheme (blue, green)
 - Made it responsive for all screen sizes
 - Added smooth animations and transitions
+- Styled authentication buttons
 
-### 5. Connected Everything Together
+### 6. Deployed to Production
 
-- Frontend calls backend API endpoints
-- Backend calls OpenAI agent
+**GitHub Setup:**
+- Created repository: https://github.com/gencay-strata/agent-strata
+- Pushed all code with proper .gitignore
+- Set up main branch for deployment
+
+**Vercel Deployment:**
+- Connected GitHub repository to Vercel
+- Selected Vite as framework preset
+- Configured environment variables
+- Set up auto-deploy on git push
+- Fixed serverless function routing issues
+
+### 7. Connected Everything Together
+
+- Frontend calls Vercel serverless API endpoints
+- Serverless functions call OpenAI agent
 - Agent calls MCP tools for data and execution
 - Results flow back through the chain
 - Everything happens in real-time
+- Authentication handled by Clerk middleware
 
 ---
 
@@ -280,22 +354,32 @@ agent-strata/
 └── mock-interview-system/
     ├── src/                           # Frontend code
     │   ├── pages/
-    │   │   ├── LandingPage.jsx       # Home screen with filters
-    │   │   ├── InterviewSession.jsx  # Main interview UI
-    │   │   └── Results.jsx           # Score dashboard
+    │   │   ├── Home.jsx              # Public landing page
+    │   │   ├── LandingPage.jsx       # Interview setup (protected)
+    │   │   ├── InterviewSession.jsx  # Main interview UI (protected)
+    │   │   └── Results.jsx           # Score dashboard (protected)
     │   ├── components/
     │   │   ├── CodeEditor.jsx        # Code editing area
     │   │   ├── ChatPanel.jsx         # AI chat interface
     │   │   └── Timer.jsx             # Countdown timer
     │   ├── services/
-    │   │   └── mcpClient.js          # Talks to backend
+    │   │   └── mcpClient.js          # Talks to serverless API
     │   └── styles/                   # CSS files for styling
     │
-    └── server/                        # Backend code
-        ├── index.js                   # Main server file
-        ├── agentClient.js            # Connects to OpenAI agent
-        ├── questionDatabase.js       # Loads and filters questions
-        └── .env                      # Secret keys (not shared)
+    ├── api/                           # Vercel serverless functions
+    │   ├── questions.js              # Question filtering endpoint
+    │   ├── agent-message.js          # AI agent communication
+    │   ├── run-code.js               # Code testing endpoint
+    │   ├── check-solution.js         # Solution grading endpoint
+    │   └── dataset-details.js        # Table schema endpoint
+    │
+    ├── server/                        # Shared backend logic
+    │   ├── agentClient.js            # Connects to OpenAI agent
+    │   ├── questionDatabase.js       # Loads and filters questions
+    │   └── .env                      # Secret keys (not shared)
+    │
+    ├── vercel.json                    # Vercel deployment config
+    └── .env                           # Frontend environment variables
 ```
 
 ---
@@ -304,11 +388,20 @@ agent-strata/
 
 ### Frontend Files
 
-**LandingPage.jsx**
-- Shows the initial screen
+**Home.jsx** (NEW - Public)
+- StrataScratch-branded landing page
+- Hero section with stats and company logos
+- CTA buttons for interview, portfolio, AI tools
+- Conditional sign-in/sign-up buttons (Clerk)
+- UserButton for logged-in users
+- No authentication required to view
+
+**LandingPage.jsx** (Protected)
+- Interview setup screen
 - Collects user preferences (language, difficulty, etc.)
 - Validates selections
 - Starts the interview
+- Requires user to be signed in
 
 **InterviewSession.jsx**
 - Displays current question
@@ -341,56 +434,108 @@ agent-strata/
 - Shows time remaining
 - Warns when time is low
 
-### Backend Files
+### Backend Files (Serverless Functions)
 
-**index.js**
-- Main Express server
-- Sets up API routes
-- Handles CORS (cross-origin requests)
-- Loads question database on startup
+**api/questions.js**
+- Serverless function for question filtering
+- Takes filter criteria (language, difficulty, company)
+- Returns matching questions from CSV
+- Deployed on Vercel
 
-**agentClient.js**
+**api/agent-message.js**
+- Serverless function for AI communication
+- Routes Test/Submit actions to OpenAI agent
+- Returns formatted responses
+- Handles errors gracefully
+
+**api/run-code.js**
+- Serverless function for code testing
+- Executes code via MCP server
+- Returns test results
+- No scoring (practice mode)
+
+**api/check-solution.js**
+- Serverless function for solution grading
+- Official scoring endpoint
+- Returns score, feedback, hints
+- Via MCP server
+
+**api/dataset-details.js**
+- Serverless function for table schemas
+- Fetches column names, types, sample data
+- Returns formatted table information
+- Used when questions change
+
+**server/agentClient.js** (Shared)
 - Connects to OpenAI Agent Builder
 - Defines the agent configuration
 - Sends requests to the agent
 - Returns formatted responses
+- Used by serverless functions
 
-**questionDatabase.js**
+**server/questionDatabase.js** (Shared)
 - Reads 413k questions from CSV
 - Filters by criteria
 - Returns matching questions quickly
+- Preloaded for fast filtering
 
 ### Configuration Files
 
-**.env**
+**server/.env** (Backend secrets)
 - OpenAI API key
 - Workflow ID
-- Other secrets
+- Workflow version
+
+**mock-interview-system/.env** (Frontend secrets)
+- VITE_CLERK_PUBLISHABLE_KEY (Clerk authentication)
+
+**vercel.json**
+- Vercel deployment configuration
+- API rewrites for serverless functions
 
 **package.json**
 - Lists all dependencies
-- Defines scripts (start, dev)
+- Defines scripts (build, dev, preview)
 
 ---
 
 ## How to Run the Project
 
-**Step 1: Start the Backend**
-```bash
-cd mock-interview-system/server
-npm run dev
-```
-This starts the server on http://localhost:3001
+### Local Development
 
-**Step 2: Start the Frontend**
+**Start the Frontend** (serverless functions won't work locally without Vercel CLI)
 ```bash
 cd mock-interview-system
 npm run dev
 ```
-This opens the app on http://localhost:3000
+This opens the app on http://localhost:5173
+
+### Production (Vercel)
+
+**The app is deployed and live!**
+- Visit the production URL (provided by Vercel)
+- All serverless functions work automatically
+- Authentication via Clerk
+- Auto-deploys when you push to GitHub
+
+### Testing Locally with Serverless Functions
+
+**Install Vercel CLI**
+```bash
+npm i -g vercel
+```
+
+**Run with serverless functions enabled**
+```bash
+cd mock-interview-system
+vercel dev
+```
 
 **Step 3: Use the App**
-- Open browser to http://localhost:3000
+- Open browser to the local URL
+- Browse public home page
+- Click "Ace Interview Questions"
+- Sign in/sign up via Clerk modal
 - Select your preferences
 - Start coding!
 
@@ -437,8 +582,10 @@ What makes this project successful:
 - OpenAI Agent Builder (AI orchestration)
 - StrataScratch MCP Server (questions & execution)
 - React + Vite (frontend framework)
-- Express.js (backend server)
+- Vercel (serverless deployment)
+- Clerk (authentication)
 - Monaco Editor (code editor)
+- GitHub (version control)
 
 **Documentation:**
 - CLAUDE.md - Technical details for developers
@@ -449,8 +596,11 @@ What makes this project successful:
 
 ## Current Status
 
-**What's Working:**
-- ✅ Complete interview flow (landing → session → results)
+**What's Working (DEPLOYED TO PRODUCTION):**
+- ✅ Public home page with StrataScratch branding
+- ✅ Clerk authentication (modal sign-in/sign-up)
+- ✅ Protected routes for interview features
+- ✅ Complete interview flow (home → setup → session → results)
 - ✅ AI agent integration with MCP server
 - ✅ Code testing and submission
 - ✅ Real-time grading and feedback
@@ -458,17 +608,20 @@ What makes this project successful:
 - ✅ Results dashboard with visualizations
 - ✅ Question filtering and selection
 - ✅ Timer and progress tracking
+- ✅ Vercel serverless deployment
+- ✅ GitHub repository with auto-deploy
 
 **Known Limitations:**
 - Chat hints not fully implemented yet
-- Need to add validation for custom interview button
 - Real-time score calculation could be more detailed
 - Export/share results feature pending
+- CSV loading may cause cold starts on serverless functions
 
 **Next Steps:**
 - Polish chat functionality
-- Add user authentication
-- Implement performance tracking
+- Implement user profile/history page
+- Optimize CSV loading for serverless
+- Add performance tracking dashboard
 - Prepare for V2 features (voice, custom questions)
 - User testing and feedback collection
 
@@ -477,12 +630,19 @@ What makes this project successful:
 ## Summary
 
 We built a **professional mock interview platform** that combines:
-- Beautiful, intuitive UI
+- Beautiful, intuitive UI with public landing page
+- Secure authentication via Clerk
 - AI-powered interviewer
 - Real code execution
 - Comprehensive feedback
 - Performance analytics
+- Production deployment on Vercel
 
-It's **ready for users** to practice their data science interview skills in a realistic environment, with the added benefit of an AI assistant that never gets tired and always provides helpful, constructive feedback.
+It's **deployed and live**, ready for users to practice their data science interview skills in a realistic environment, with the added benefit of an AI assistant that never gets tired and always provides helpful, constructive feedback.
 
-The system is **scalable and maintainable**, with clear documentation for future developers and a solid architectural foundation for adding new features.
+The system is **scalable and maintainable**, with:
+- Serverless architecture (no server management needed)
+- Clear documentation for future developers
+- GitHub version control with auto-deploy
+- Solid architectural foundation for adding new features
+- Modern authentication system
