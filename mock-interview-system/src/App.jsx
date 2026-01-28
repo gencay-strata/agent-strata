@@ -17,22 +17,10 @@ function App() {
     <ClerkProvider publishableKey={clerkPubKey}>
       <Router>
         <Routes>
-          {/* Home page - StrataScratch landing */}
-          <Route
-            path="/"
-            element={
-              <>
-                <SignedIn>
-                  <Home />
-                </SignedIn>
-                <SignedOut>
-                  <RedirectToSignIn />
-                </SignedOut>
-              </>
-            }
-          />
+          {/* Home page - Public (no auth required) */}
+          <Route path="/" element={<Home />} />
 
-          {/* Interview setup page */}
+          {/* Interview setup page - Protected */}
           <Route
             path="/interview-setup"
             element={
@@ -47,7 +35,7 @@ function App() {
             }
           />
 
-          {/* Interview session */}
+          {/* Interview session - Protected */}
           <Route
             path="/interview"
             element={
@@ -62,7 +50,7 @@ function App() {
             }
           />
 
-          {/* Results page */}
+          {/* Results page - Protected */}
           <Route
             path="/results"
             element={

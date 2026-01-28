@@ -73,6 +73,35 @@
   background: #e5e7eb;
 }
 
+.sign-in-btn,
+.sign-up-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sign-in-btn {
+  background: transparent;
+  color: #64748b;
+}
+
+.sign-in-btn:hover {
+  color: #0ea5e9;
+}
+
+.sign-up-btn {
+  background: #10b981;
+  color: white;
+}
+
+.sign-up-btn:hover {
+  background: #059669;
+}
+
 /* Hero Section */
 .hero-section {
   padding: 6rem 2rem;

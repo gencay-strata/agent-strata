@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserButton } from '@clerk/clerk-react';
+import { UserButton, SignInButton, SignUpButton, SignedIn, SignedOut } from '@clerk/clerk-react';
 import '../styles/Home.css';
 
 function Home() {
@@ -25,7 +25,17 @@ function Home() {
           </div>
           <div className="header-actions">
             <button className="search-btn">🔍 Search ⌘K</button>
-            <UserButton afterSignOutUrl="/" />
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="sign-in-btn">Sign In</button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button className="sign-up-btn">Sign Up</button>
+              </SignUpButton>
+            </SignedOut>
+            <SignedIn>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
           </div>
         </div>
       </header>
