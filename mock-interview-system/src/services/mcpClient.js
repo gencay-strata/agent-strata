@@ -123,7 +123,7 @@ class MCPClient {
    */
   async sendAgentMessage({ message, context }) {
     try {
-      const response = await fetch(`${BACKEND_URL}/api/agent/message`, {
+      const response = await fetch(`${BACKEND_URL}/api/agent-message`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
