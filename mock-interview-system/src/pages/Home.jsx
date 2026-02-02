@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserButton, SignInButton, SignUpButton, SignedIn, SignedOut } from '@clerk/clerk-react';
+import { UserButton, SignInButton, SignedIn, SignedOut } from '@clerk/clerk-react';
 import '../styles/Home.css';
 
 function Home() {
@@ -29,12 +29,9 @@ function Home() {
               <SignInButton mode="modal">
                 <button className="sign-in-btn">Sign In</button>
               </SignInButton>
-              <SignUpButton mode="modal">
-                <button className="sign-up-btn">Sign Up</button>
-              </SignUpButton>
             </SignedOut>
             <SignedIn>
-              <UserButton afterSignOutUrl="/" />
+              <UserButton />
             </SignedIn>
           </div>
         </div>
