@@ -75,12 +75,12 @@ const InterviewSession = () => {
         }, 100);
       }
 
-      // Initialize chat with first question
+      // Initialize chat with welcome message
       if (selectedQuestions.length > 0) {
-        console.log('✅ Setting up chat with first question');
+        console.log('✅ Setting up chat with welcome message');
         const welcomeMessage = {
           role: 'assistant',
-          content: `Welcome to your ${filters.skillLevel} ${filters.language} interview for ${filters.jobPosition}!\n\nYou have ${filters.duration} minutes to complete ${filters.questionCount} question(s).\n\nLet's begin with Question 1:\n\n**${selectedQuestions[0].title}**\n\n${selectedQuestions[0].description}\n\nFeel free to ask clarifying questions before you start coding!`,
+          content: `Welcome to your ${filters.skillLevel} ${filters.language} interview for ${filters.jobPosition}! 👋\n\nYou have ${filters.duration} minutes to complete ${filters.questionCount} question(s).\n\nI'm here to help if you need hints or have questions about the problem. Good luck! 💪`,
           timestamp: new Date()
         };
         setChatMessages([welcomeMessage]);
@@ -154,23 +154,47 @@ const InterviewSession = () => {
     };
 
     setChatMessages(prev => [...prev, userMessage]);
+    const messageCopy = userInput;
     setUserInput('');
     setIsLoading(true);
 
     try {
-      // Simple AI response for clarifying questions
-      // In a full implementation, you'd use Claude API here
-      const response = generateAIResponse(userInput, questions[currentQuestionIndex]);
+      // Call agent API for response
+      const result = await mcpClient.sendAgentMessage({
+        message: messageCopy,
+        context: {
+          action: 'question',
+          question_id: questions[currentQuestionIndex].id,
+          question_title: questions[currentQuestionIndex].title,
+          question_description: questions[currentQuestionIndex].description,
+          language: filters.language.toLowerCase(),
+          code: code || ''
+        }
+      });
+
+      // Parse agent response
+      let responseContent = '';
+      if (result.content && typeof result.content === 'string') {
+        responseContent = result.content;
+      } else {
+        responseContent = 'I can help clarify the problem or provide strategic hints. What would you like to know?';
+      }
 
       const aiMessage = {
         role: 'assistant',
-        content: response,
+        content: responseContent,
         timestamp: new Date()
       };
 
       setChatMessages(prev => [...prev, aiMessage]);
     } catch (error) {
-      console.error('Error generating response:', error);
+      console.error('Error getting agent response:', error);
+      const errorMessage = {
+        role: 'assistant',
+        content: 'Sorry, I encountered an error. Please try again.',
+        timestamp: new Date()
+      };
+      setChatMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -299,25 +323,6 @@ const InterviewSession = () => {
         </table>
       </div>
     ));
-  };
-
-  const generateAIResponse = (userQuestion, currentQuestion) => {
-    // Simple keyword-based responses
-    const lowerQuestion = userQuestion.toLowerCase();
-
-    if (lowerQuestion.includes('hint') || lowerQuestion.includes('help')) {
-      return `Here's a hint: Think about how you would ${currentQuestion.language === 'sql' ? 'join tables and filter data' : 'iterate through the data structure'}. Break down the problem step by step.`;
-    }
-
-    if (lowerQuestion.includes('clarif') || lowerQuestion.includes('what')) {
-      return `Good question! ${currentQuestion.description}\n\nThe key is to focus on ${currentQuestion.language === 'sql' ? 'writing efficient queries' : 'optimizing your algorithm'}. Let me know if you need more details about any specific part.`;
-    }
-
-    if (lowerQuestion.includes('time') || lowerQuestion.includes('long')) {
-      return `Take your time to think through the solution. You have ${Math.floor(timeRemaining / 60)} minutes remaining. Quality matters more than speed!`;
-    }
-
-    return `That's a great question! For this problem, consider the requirements carefully. ${currentQuestion.description}\n\nFeel free to start coding when you're ready, or ask more questions if needed.`;
   };
 
   const handleTestCode = async () => {
@@ -574,6 +579,56 @@ const InterviewSession = () => {
     }
   };
 
+  const handleRequestHint = async () => {
+    setIsLoading(true);
+
+    try {
+      // Call agent API to get a hint for the current question
+      const result = await mcpClient.sendAgentMessage({
+        message: 'Can you give me a hint for this question?',
+        context: {
+          action: 'hint',
+          question_id: questions[currentQuestionIndex].id,
+          question_title: questions[currentQuestionIndex].title,
+          question_description: questions[currentQuestionIndex].description,
+          language: filters.language.toLowerCase(),
+          code: code || '' // Send current code if available
+        }
+      });
+
+      console.log('💡 Hint result from agent:', result);
+
+      // Parse agent response (should be markdown text)
+      let hintContent = '';
+      if (result.content && typeof result.content === 'string') {
+        hintContent = result.content;
+      } else if (result.type === 'hint' && result.content) {
+        hintContent = result.content;
+      } else {
+        hintContent = 'Here\'s a hint: Break down the problem into smaller steps. Consider what data transformations are needed.';
+      }
+
+      // Add hint message to chat
+      const hintMessage = {
+        role: 'assistant',
+        content: `💡 **Hint:**\n\n${hintContent}`,
+        timestamp: new Date()
+      };
+
+      setChatMessages(prev => [...prev, hintMessage]);
+    } catch (error) {
+      console.error('Error getting hint:', error);
+      const errorMessage = {
+        role: 'assistant',
+        content: `Sorry, I couldn't generate a hint right now. Try asking me a specific question about the problem instead!`,
+        timestamp: new Date()
+      };
+      setChatMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const moveToNextQuestion = () => {
     const nextIndex = currentQuestionIndex + 1;
     setCurrentQuestionIndex(nextIndex);
@@ -671,10 +726,6 @@ const InterviewSession = () => {
                 <span className="difficulty-icon">▼</span> {currentQuestion.difficulty === '2' ? 'Medium' : currentQuestion.difficulty === '1' ? 'Easy' : 'Hard'}
               </span>
               <span className="question-id">ID {currentQuestion.id}</span>
-              <div className="like-dislike">
-                <button className="like-btn">👍 337</button>
-                <button className="dislike-btn">👎</button>
-              </div>
             </div>
 
             {/* Question Description */}
@@ -739,61 +790,77 @@ const InterviewSession = () => {
 
             {/* Hint Button */}
             <div className="question-footer">
-              <button className="hint-btn">
-                <span>💡</span> Need a hint?
+              <button
+                className="hint-btn"
+                onClick={handleRequestHint}
+                disabled={isLoading}
+              >
+                <span>💡</span> {isLoading ? 'Getting hint...' : 'Need a hint?'}
               </button>
             </div>
           </div>
         </div>
 
-        {/* Right Panel - Code Editor */}
-        <div className="code-panel">
-          <div className="code-header">
-            <div className="language-selector">
-              <span className="language-label">{filters.language}</span>
+        {/* Right Panel Container - Code Editor + Chat */}
+        <div className="right-panel-container">
+          {/* Code Editor Panel */}
+          <div className="code-panel">
+            <div className="code-header">
+              <div className="language-selector">
+                <span className="language-label">{filters.language}</span>
+              </div>
+              <div className="code-actions">
+                <button
+                  onClick={handleTestCode}
+                  disabled={isLoading}
+                  className="btn-test"
+                >
+                  <Play size={18} />
+                  Test
+                </button>
+                <button
+                  onClick={handleSubmitCode}
+                  disabled={isLoading}
+                  className="btn-submit"
+                >
+                  <CheckCircle size={18} />
+                  Submit
+                </button>
+              </div>
             </div>
-            <div className="code-actions">
-              <button
-                onClick={handleTestCode}
+
+            <CodeEditor
+              code={code}
+              onChange={setCode}
+              language={filters.language.toLowerCase()}
+            />
+          </div>
+
+          {/* Chat Panel - AI Interviewer */}
+          <div className="chat-panel-container">
+            <div className="chat-header">
+              <h3>💬 AI Interviewer</h3>
+            </div>
+            <ChatPanel messages={chatMessages} isLoading={isLoading} />
+            <div className="chat-input-container">
+              <input
+                type="text"
+                className="chat-input"
+                placeholder="Ask a question or request a hint..."
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                 disabled={isLoading}
-                className="btn-test"
-              >
-                <Play size={18} />
-                Test
-              </button>
+              />
               <button
-                onClick={handleSubmitCode}
-                disabled={isLoading}
-                className="btn-submit"
+                className="chat-send-btn"
+                onClick={handleSendMessage}
+                disabled={isLoading || !userInput.trim()}
               >
-                <CheckCircle size={18} />
-                Submit
+                <Send size={18} />
               </button>
             </div>
           </div>
-
-          <CodeEditor
-            code={code}
-            onChange={setCode}
-            language={filters.language.toLowerCase()}
-          />
-
-          {/* Test Results Display */}
-          {testResults && testResults.output && (
-            <div className={`test-results-panel ${testResults.success ? 'success' : 'error'}`}>
-              <div className="results-header">
-                <span className="results-icon">
-                  {testResults.success ? '✅' : '❌'}
-                </span>
-                <span className="results-title">
-                  {testResults.message || 'Test Results'}
-                </span>
-              </div>
-              <div className="results-content">
-                <pre>{testResults.output}</pre>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
