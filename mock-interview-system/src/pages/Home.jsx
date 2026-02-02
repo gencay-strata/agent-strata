@@ -8,7 +8,7 @@ function Home() {
 
   return (
     <div className="home-container">
-      {/* StrataScratch Header */}
+      {/* StrataScratch Header - Sign In Only */}
       <header className="strata-header">
         <div className="header-content">
           <div className="logo-section">
