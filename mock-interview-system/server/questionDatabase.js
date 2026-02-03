@@ -106,8 +106,9 @@ export function filterQuestions(filters = {}) {
   // Filter by company
   if (filters.company) {
     filtered = filtered.filter(q =>
-      q.company && q.company.toLowerCase().includes(filters.company.toLowerCase())
+      q.companies && q.companies.toLowerCase().includes(filters.company.toLowerCase())
     );
+    console.log(`After company filter: ${filtered.length} questions`);
   }
 
   // Filter by language/type

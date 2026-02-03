@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Clock, Code, Briefcase, Target, ChevronDown } from 'lucide-react';
+import { Clock, Code, Target, ChevronDown } from 'lucide-react';
 import '../styles/LandingPage.css';
 
 const LandingPage = () => {
@@ -9,20 +9,16 @@ const LandingPage = () => {
 
   const [filters, setFilters] = useState({
     language: 'SQL',
-    jobPosition: 'Data Analyst',
     skillLevel: 'Medium',
     company: '',
-    interviewType: 'Technical',
     duration: 60,
     questionCount: 2
   });
 
   const filterOptions = {
     language: ['SQL', 'Python', 'R'],
-    jobPosition: ['Data Analyst', 'Data Scientist', 'Data Engineer', 'ML Engineer', 'Business Analyst'],
     skillLevel: ['Easy', 'Medium', 'Hard'],
     company: ['', 'Meta', 'Google', 'Amazon', 'Microsoft', 'Netflix', 'Apple', 'Uber', 'Airbnb'],
-    interviewType: ['Technical', 'Behavioral', 'Case Study', 'Mixed'],
     duration: [30, 45, 60, 90, 120],
     questionCount: [1, 2, 3, 4, 5]
   };
@@ -30,10 +26,8 @@ const LandingPage = () => {
   const handleQuickStart = () => {
     const defaultFilters = {
       language: 'SQL',
-      jobPosition: 'Data Analyst',
       skillLevel: 'Medium',
       company: '',
-      interviewType: 'Technical',
       duration: 60,
       questionCount: 2
     };
@@ -70,10 +64,6 @@ const LandingPage = () => {
               <div className="setting-item">
                 <Code size={18} />
                 <span>SQL Questions</span>
-              </div>
-              <div className="setting-item">
-                <Briefcase size={18} />
-                <span>Data Analyst Level</span>
               </div>
               <div className="setting-item">
                 <Target size={18} />
@@ -119,18 +109,6 @@ const LandingPage = () => {
                 </div>
 
                 <div className="filter-group">
-                  <label>Job Position</label>
-                  <select
-                    value={filters.jobPosition}
-                    onChange={(e) => updateFilter('jobPosition', e.target.value)}
-                  >
-                    {filterOptions.jobPosition.map(pos => (
-                      <option key={pos} value={pos}>{pos}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="filter-group">
                   <label>Skill Level</label>
                   <select
                     value={filters.skillLevel}
@@ -152,18 +130,6 @@ const LandingPage = () => {
                       <option key={comp} value={comp}>
                         {comp || 'Any Company'}
                       </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="filter-group">
-                  <label>Interview Type</label>
-                  <select
-                    value={filters.interviewType}
-                    onChange={(e) => updateFilter('interviewType', e.target.value)}
-                  >
-                    {filterOptions.interviewType.map(type => (
-                      <option key={type} value={type}>{type}</option>
                     ))}
                   </select>
                 </div>

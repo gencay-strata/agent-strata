@@ -80,7 +80,7 @@ const InterviewSession = () => {
         console.log('✅ Setting up chat with welcome message');
         const welcomeMessage = {
           role: 'assistant',
-          content: `Welcome to your ${filters.skillLevel} ${filters.language} interview for ${filters.jobPosition}! 👋\n\nYou have ${filters.duration} minutes to complete ${filters.questionCount} question(s).\n\nI'm here to help if you need hints or have questions about the problem. Good luck! 💪`,
+          content: `Welcome to your ${filters.skillLevel} ${filters.language} interview! 👋\n\nYou have ${filters.duration} minutes to complete ${filters.questionCount} question(s).\n\nI'm here to help if you need hints or have questions about the problem. Good luck! 💪`,
           timestamp: new Date()
         };
         setChatMessages([welcomeMessage]);
