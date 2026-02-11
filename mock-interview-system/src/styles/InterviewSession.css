@@ -646,7 +646,7 @@
   background: #fef2f2;
 }
 
-.results-header {
+.test-results-panel .results-header {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -665,21 +665,21 @@
   color: #991b1b;
 }
 
-.results-icon {
+.test-results-panel .results-icon {
   font-size: 1.25rem;
 }
 
-.results-title {
+.test-results-panel .results-title {
   font-size: 0.95rem;
 }
 
-.results-content {
+.test-results-panel .results-content {
   padding: 1rem;
   max-height: 400px;
   overflow-y: auto;
 }
 
-.results-content pre {
+.test-results-panel .results-content pre {
   margin: 0;
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 0.875rem;
@@ -698,21 +698,21 @@
 }
 
 /* Scrollbar styling for results */
-.results-content::-webkit-scrollbar {
+.test-results-panel .results-content::-webkit-scrollbar {
   width: 8px;
 }
 
-.results-content::-webkit-scrollbar-track {
+.test-results-panel .results-content::-webkit-scrollbar-track {
   background: rgba(0, 0, 0, 0.05);
   border-radius: 4px;
 }
 
-.results-content::-webkit-scrollbar-thumb {
+.test-results-panel .results-content::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 4px;
 }
 
-.results-content::-webkit-scrollbar-thumb:hover {
+.test-results-panel .results-content::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.3);
 }
 

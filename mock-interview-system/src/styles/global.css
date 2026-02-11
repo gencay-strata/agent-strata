@@ -6,6 +6,11 @@
   box-sizing: border-box;
 }
 
+html, body, #root {
+  height: auto;
+  overflow-y: auto;
+}
+
 :root {
   /* StrataScratch Colors */
   --primary-teal: #00A699;

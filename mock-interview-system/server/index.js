@@ -5,7 +5,7 @@ import fetch from 'node-fetch';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { getRandomQuestions, preloadQuestions } from './questionDatabase.js';
-import { callInterviewAgent } from './agentClient.js';
+import { callInterviewAgent, callReviewAgent } from './agentClient.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,7 +13,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-const STRATA_MCP_URL = "https://api.stratascratch.com/mcp";
+const STRATA_MCP_URL = "https://strata-api-develop.stratascratch.com/mcp-L5fY-ByOAWaGnxciuiqysYj_45pm8REXg9d3frmFPmE";
 
 app.use(cors());
 app.use(express.json());
@@ -337,8 +337,41 @@ app.post('/api/dataset-details', async (req, res) => {
   }
 });
 
-// Agent communication endpoint
-app.post('/api/agent/message', async (req, res) => {
+// Review Agent endpoint
+app.post('/api/review-feedback', async (req, res) => {
+  try {
+    const { questions, submissions, filters, timeSpent, totalDuration } = req.body;
+
+    console.log('📨 Review Agent request:', {
+      questionCount: questions?.length,
+      submissionCount: submissions?.length
+    });
+
+    const reviewResponse = await callReviewAgent({
+      questions,
+      submissions,
+      filters,
+      timeSpent,
+      totalDuration
+    });
+
+    console.log('✅ Review Agent response received');
+
+    return res.json({
+      type: 'review',
+      content: reviewResponse.feedback
+    });
+  } catch (error) {
+    console.error('❌ Review Agent failed:', error);
+    return res.status(500).json({
+      type: 'error',
+      content: `Review Agent error: ${error.message}`
+    });
+  }
+});
+
+// Agent communication endpoint (supports both URL formats)
+app.post('/api/agent-message', async (req, res) => {
   try {
     const { message, context } = req.body;
     // context includes: question_id, code, language, action (test/submit/hint/question)

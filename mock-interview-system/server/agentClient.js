@@ -1,10 +1,11 @@
 /**
- * OpenAI Agents SDK Client for Interview Agent
- * Uses the actual Agent Builder workflow
+ * OpenAI Agents SDK Client for Interview Agent + Review Agent
+ * Uses the actual Agent Builder workflows
  */
 import { hostedMcpTool, Agent, Runner, withTrace } from "@openai/agents";
 
 const WORKFLOW_ID = process.env.WORKFLOW_ID || 'wf_69785b59a66081908294851545870e8105ee6027e0451e3f';
+const WORKFLOW_ID_REVIEW = process.env.WORKFLOW_ID_REVIEW || 'wf_698c075296008190b107a4b83511206f0fff3039f047fa39';
 
 // MCP Tool definition (same as Agent Builder)
 const mcp = hostedMcpTool({
@@ -17,7 +18,7 @@ const mcp = hostedMcpTool({
   ],
   requireApproval: "never", // Auto-approve for backend usage
   serverDescription: "StrataScratch MCP Tools",
-  serverUrl: "https://api.stratascratch.com/mcp"
+  serverUrl: "https://strata-api-develop.stratascratch.com/mcp-L5fY-ByOAWaGnxciuiqysYj_45pm8REXg9d3frmFPmE"
 });
 
 // Agent definition (same as Agent Builder)
@@ -96,6 +97,109 @@ GOOD: "❌ Error: syntax error near WHERE. Check line 3."`,
     store: true
   }
 });
+
+// Review Agent definition
+const reviewAgent = new Agent({
+  name: "Review Agent",
+  instructions: `You are the Review Agent for StrataScratch Mock Interviews. You receive completed interview data and generate performance assessments.
+
+INPUT: JSON with questions, submissions (code + scores), filters, timeSpent
+OUTPUT: Always plain markdown (NOT JSON)
+
+## OUTPUT STRUCTURE
+1. 📊 Overall Score (X/100, percentile, time used, questions solved)
+2. 📋 Per-Question Analysis (what was good, what to improve, better code example)
+3. 🎯 Strengths & Weaknesses table (Technical Skill, Code Quality, Problem Solving, Time Management — star ratings)
+4. 🔑 Key Patterns (2-3 patterns across all questions)
+5. 📚 Practice Plan (weak topics + recommended question IDs)
+
+## RULES
+- Be specific — reference user's actual code, not generic advice
+- Include code examples showing improvements
+- Rate honestly — don't inflate scores
+- Use emojis: ✅ ❌ 💡 ⚠️ 📊 🎯
+- NO greetings — jump straight to review
+- NO JSON responses — always markdown
+- Tone: Senior engineer giving constructive code review`,
+  model: "gpt-5.2",
+  tools: [mcp],
+  modelSettings: {
+    reasoning: {
+      effort: "medium",
+      summary: "auto"
+    },
+    store: true
+  }
+});
+
+export async function callReviewAgent({ questions, submissions, filters, timeSpent, totalDuration }) {
+  try {
+    const reviewMessage = `REVIEW REQUEST
+${JSON.stringify({
+  action: "review",
+  questions: questions.map(q => ({
+    id: q.id || q.question_id,
+    title: q.title || q.question_short,
+    difficulty: q.difficulty,
+    company: q.company
+  })),
+  submissions: submissions.map(s => ({
+    questionId: s.questionId,
+    code: s.code,
+    result: s.result,
+    timeSpent: s.timeSpent
+  })),
+  filters,
+  totalTimeSpent: timeSpent,
+  totalDuration
+}, null, 2)}
+
+Analyze this completed interview and generate a comprehensive performance review.`;
+
+    console.log('📨 Calling Review Agent (Agents SDK)...');
+
+    const result = await withTrace("Review", async () => {
+      const conversationHistory = [
+        {
+          role: "user",
+          content: [{
+            type: "input_text",
+            text: reviewMessage
+          }]
+        }
+      ];
+
+      const runner = new Runner({
+        traceMetadata: {
+          __trace_source__: "backend-integration",
+          workflow_id: WORKFLOW_ID_REVIEW,
+          action: "review"
+        }
+      });
+
+      const agentResult = await runner.run(reviewAgent, conversationHistory);
+
+      if (!agentResult.finalOutput) {
+        throw new Error("Review Agent result is undefined");
+      }
+
+      return {
+        output_text: agentResult.finalOutput
+      };
+    });
+
+    console.log('✅ Review Agent response received');
+
+    return {
+      success: true,
+      feedback: result.output_text || 'No feedback from Review Agent'
+    };
+
+  } catch (error) {
+    console.error('❌ Review Agent call failed:', error);
+    throw error;
+  }
+}
 
 export async function callInterviewAgent({ message, context }) {
   try {
@@ -196,5 +300,6 @@ Answer the candidate's question about the problem.`;
 }
 
 export default {
-  callInterviewAgent
+  callInterviewAgent,
+  callReviewAgent
 };

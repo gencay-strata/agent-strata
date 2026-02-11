@@ -1,12 +1,63 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { UserButton, useUser } from '@clerk/clerk-react';
+import { UserButton } from '@clerk/clerk-react';
+import mcpClient from '../services/mcpClient';
 import '../styles/Results.css';
+
+// Simple markdown to HTML converter
+function formatMarkdown(md) {
+  return md
+    .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code class="lang-$1">$2</code></pre>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/^### (.+)$/gm, '<h4>$1</h4>')
+    .replace(/^## (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^# (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^---$/gm, '<hr/>')
+    .replace(/^\| (.+) \|$/gm, (match) => {
+      const cells = match.slice(1, -1).split('|').map(c => c.trim());
+      return '<tr>' + cells.map(c => `<td>${c}</td>`).join('') + '</tr>';
+    })
+    .replace(/(<tr>.*<\/tr>\n?)+/g, '<table class="review-table">$&</table>')
+    .replace(/^- (.+)$/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
+    .replace(/^(?!<[hulprt])(.*\S.*)$/gm, '<p>$1</p>')
+    .replace(/\n{2,}/g, '\n');
+}
 
 const Results = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { filters, questions, submissions, timeSpent } = location.state || {};
+  const [reviewFeedback, setReviewFeedback] = useState(null);
+  const [reviewLoading, setReviewLoading] = useState(true);
+  const [reviewError, setReviewError] = useState(null);
+
+  // Fetch review feedback from Review Agent
+  useEffect(() => {
+    if (!submissions || !questions) return;
+
+    const fetchReview = async () => {
+      try {
+        setReviewLoading(true);
+        const response = await mcpClient.getReviewFeedback({
+          questions,
+          submissions,
+          filters,
+          timeSpent,
+          totalDuration: filters.duration * 60
+        });
+        setReviewFeedback(response.content);
+      } catch (err) {
+        console.error('Review Agent error:', err);
+        setReviewError('Failed to generate AI review. Please try again.');
+      } finally {
+        setReviewLoading(false);
+      }
+    };
+
+    fetchReview();
+  }, []);
 
   if (!submissions || !questions) {
     navigate('/');
@@ -34,8 +85,6 @@ const Results = () => {
   const technicalSkill = Math.min(10, Math.round(scoreOutOf10 * 1.1));
   const codeQuality = Math.min(10, Math.round(scoreOutOf10 * 0.95));
   const communication = Math.min(10, Math.round(scoreOutOf10 * 0.9));
-
-  const { user } = useUser();
 
   return (
     <div className="results-container">
@@ -178,13 +227,13 @@ const Results = () => {
         <div className="question-summary">
           <h3>Question Summary</h3>
           {submissions.map((submission, idx) => {
-            const question = questions[idx];
+            const question = questions[idx] || {};
             return (
               <div key={idx} className={`question-item ${submission.result?.correct ? 'correct' : 'incorrect'}`}>
                 <div className="question-number">Q{idx + 1}</div>
                 <div className="question-details">
                   <div className="question-title-row">
-                    <span className="question-title">{question.title || question.question_short}</span>
+                    <span className="question-title">{question.title || question.question_short || 'Question'}</span>
                     <span className="question-score">
                       {submission.result?.correct ? '9' : Math.floor(Math.random() * 5 + 3)}<span className="score-max">/10</span>
                     </span>
@@ -199,6 +248,28 @@ const Results = () => {
               </div>
             );
           })}
+        </div>
+
+        {/* AI Review Feedback */}
+        <div className="ai-review-section">
+          <h3>🤖 AI Performance Review</h3>
+          {reviewLoading && (
+            <div className="review-loading">
+              <div className="loading-spinner"></div>
+              <p>Review Agent is analyzing your performance...</p>
+            </div>
+          )}
+          {reviewError && (
+            <div className="review-error">
+              <p>⚠️ {reviewError}</p>
+            </div>
+          )}
+          {reviewFeedback && (
+            <div
+              className="review-content"
+              dangerouslySetInnerHTML={{ __html: formatMarkdown(reviewFeedback) }}
+            />
+          )}
         </div>
 
         {/* Action Buttons */}

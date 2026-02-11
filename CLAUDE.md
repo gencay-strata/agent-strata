@@ -39,11 +39,12 @@ agent-strata/
 │   ├── api/                             # Vercel serverless functions
 │   │   ├── questions.js                 # POST /api/questions
 │   │   ├── agent-message.js             # POST /api/agent-message
+│   │   ├── review-feedback.js           # POST /api/review-feedback (Review Agent)
 │   │   ├── run-code.js                  # POST /api/run-code
 │   │   ├── check-solution.js            # POST /api/check-solution
 │   │   └── dataset-details.js           # POST /api/dataset-details
 │   ├── server/
-│   │   ├── agentClient.js               # OpenAI Agents SDK client
+│   │   ├── agentClient.js               # OpenAI Agents SDK client (Interview + Review agents)
 │   │   ├── questionDatabase.js          # CSV question cache
 │   │   └── .env                         # API keys (OPENAI_API_KEY)
 │   └── vercel.json                      # Vercel configuration
@@ -188,6 +189,7 @@ Database + Code Executor
 # server/.env
 OPENAI_API_KEY=sk-proj-...
 WORKFLOW_ID=wf_69785b59a66081908294851545870e8105ee6027e0451e3f
+WORKFLOW_ID_REVIEW=wf_698c075296008190b107a4b83511206f0fff3039f047fa39
 WORKFLOW_VERSION=1
 
 # Frontend (.env in root)
@@ -197,7 +199,8 @@ VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
 ### Vercel Production
 Set these environment variables in Vercel dashboard:
 - `OPENAI_API_KEY` - OpenAI API key for agent access
-- `WORKFLOW_ID` - Agent Builder workflow ID
+- `WORKFLOW_ID` - Interview Agent workflow ID
+- `WORKFLOW_ID_REVIEW` - Review Agent workflow ID
 - `WORKFLOW_VERSION` - Workflow version (default: 1)
 - `VITE_CLERK_PUBLISHABLE_KEY` - Clerk publishable key (NOT NEXT_PUBLIC_)
 

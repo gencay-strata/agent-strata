@@ -1,5 +1,7 @@
 .results-container {
   min-height: 100vh;
+  height: auto;
+  overflow-y: auto;
   background: #f8fafc;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
@@ -71,9 +73,9 @@
 
 /* Main Content */
 .results-content {
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 2rem 4rem;
 }
 
 /* Header */
@@ -495,6 +497,120 @@
 
 .test-cases {
   color: #64748b;
+}
+
+/* AI Review Section */
+.ai-review-section {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  border-left: 4px solid #8b5cf6;
+}
+
+.ai-review-section h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+}
+
+.review-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 0;
+  color: #64748b;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #8b5cf6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.review-error {
+  padding: 1rem;
+  background: #fef2f2;
+  border-radius: 8px;
+  color: #dc2626;
+}
+
+.review-content {
+  line-height: 1.7;
+  color: #334155;
+}
+
+.review-content h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 1.5rem 0 0.75rem;
+}
+
+.review-content h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 1.25rem 0 0.5rem;
+}
+
+.review-content h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #334155;
+  margin: 1rem 0 0.5rem;
+}
+
+.review-content pre {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 0.75rem 0;
+  font-size: 0.875rem;
+}
+
+.review-content ul {
+  padding-left: 1.25rem;
+  margin: 0.5rem 0;
+}
+
+.review-content li {
+  margin-bottom: 0.35rem;
+}
+
+.review-content hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 1.5rem 0;
+}
+
+.review-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0;
+}
+
+.review-table td {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  font-size: 0.875rem;
+}
+
+.review-table tr:first-child td {
+  background: #f8fafc;
+  font-weight: 600;
 }
 
 /* Action Buttons */

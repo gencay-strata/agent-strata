@@ -176,6 +176,39 @@ class MCPClient {
   }
 
   /**
+   * Get review feedback from Review Agent
+   * @param {Object} params
+   * @param {Array} params.questions - Interview questions
+   * @param {Array} params.submissions - User submissions with results
+   * @param {Object} params.filters - Interview filters
+   * @param {number} params.timeSpent - Total time in seconds
+   * @param {number} params.totalDuration - Allotted time in seconds
+   * @returns {Promise<Object>} Review feedback
+   */
+  async getReviewFeedback({ questions, submissions, filters, timeSpent, totalDuration }) {
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/review-feedback`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ questions, submissions, filters, timeSpent, totalDuration })
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error getting review feedback:", error);
+      throw error;
+    }
+  }
+
+  /**
    * Fetch available tools from MCP server
    * @returns {Promise<Array>} Available tools
    */
