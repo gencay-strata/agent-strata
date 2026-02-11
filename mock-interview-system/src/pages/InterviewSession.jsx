@@ -508,7 +508,27 @@ const InterviewSession = () => {
           timestamp: new Date()
         };
 
-        setSubmissions(prev => [...prev, submission]);
+        // Update or add submission (replace if same question was already submitted)
+        setSubmissions(prev => {
+          const idx = prev.findIndex(s => s.questionId === submission.questionId);
+          if (idx >= 0) {
+            const updated = [...prev];
+            updated[idx] = submission;
+            return updated;
+          }
+          return [...prev, submission];
+        });
+
+        // Build latest submissions for navigation
+        const latestSubmissions = (() => {
+          const idx = submissions.findIndex(s => s.questionId === submission.questionId);
+          if (idx >= 0) {
+            const updated = [...submissions];
+            updated[idx] = submission;
+            return updated;
+          }
+          return [...submissions, submission];
+        })();
 
         // Move to next question if correct
         if (isCorrect && currentQuestionIndex < questions.length - 1) {
@@ -520,7 +540,7 @@ const InterviewSession = () => {
               state: {
                 filters,
                 questions,
-                submissions: [...submissions, submission],
+                submissions: latestSubmissions,
                 timeSpent: (filters.duration * 60) - timeRemaining
               }
             });
@@ -540,7 +560,27 @@ const InterviewSession = () => {
           timestamp: new Date()
         };
 
-        setSubmissions(prev => [...prev, submission]);
+        // Update or add submission (replace if same question was already submitted)
+        setSubmissions(prev => {
+          const idx = prev.findIndex(s => s.questionId === submission.questionId);
+          if (idx >= 0) {
+            const updated = [...prev];
+            updated[idx] = submission;
+            return updated;
+          }
+          return [...prev, submission];
+        });
+
+        // Build latest submissions for navigation
+        const latestSubmissions = (() => {
+          const idx = submissions.findIndex(s => s.questionId === submission.questionId);
+          if (idx >= 0) {
+            const updated = [...submissions];
+            updated[idx] = submission;
+            return updated;
+          }
+          return [...submissions, submission];
+        })();
 
         const resultMessage = {
           role: 'assistant',
@@ -560,7 +600,7 @@ const InterviewSession = () => {
               state: {
                 filters,
                 questions,
-                submissions: [...submissions, submission],
+                submissions: latestSubmissions,
                 timeSpent: (filters.duration * 60) - timeRemaining
               }
             });
