@@ -4,7 +4,9 @@
       "Bash(lsof:*)",
       "Bash(xargs kill -9)",
       "Bash(PORT=3001 npm start)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(kill:*)",
+      "Bash(npm run dev:*)"
     ]
   }
 }

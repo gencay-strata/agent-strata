@@ -5,7 +5,7 @@ import fetch from 'node-fetch';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { getRandomQuestions, preloadQuestions } from './questionDatabase.js';
-import { callInterviewAgent, callReviewAgent } from './agentClient.js';
+import { callInterviewAgentRouted, callReviewAgentRouted } from './agentClient.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -347,7 +347,7 @@ app.post('/api/review-feedback', async (req, res) => {
       submissionCount: submissions?.length
     });
 
-    const reviewResponse = await callReviewAgent({
+    const reviewResponse = await callReviewAgentRouted({
       questions,
       submissions,
       filters,
@@ -381,7 +381,7 @@ app.post('/api/agent-message', async (req, res) => {
     // Call Interview Agent (Agents SDK with MCP tools)
     try {
       console.log('🤖 Calling Interview Agent via Agents SDK...');
-      const agentResponse = await callInterviewAgent({ message, context });
+      const agentResponse = await callInterviewAgentRouted({ message, context });
       console.log('✅ Agent response received');
 
       // Agent handles MCP internally and returns formatted text
