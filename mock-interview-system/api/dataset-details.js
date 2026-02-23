@@ -69,8 +69,16 @@ export default async function handler(req, res) {
       code_type: Number(code_type)
     });
 
-    console.log(`✅ Schema fetched:`, result);
+    console.log(`✅ MCP raw result:`, result);
 
+    // Parse MCP response: result.content[0].text contains JSON
+    if (result.content && result.content[0] && result.content[0].text) {
+      const parsedData = JSON.parse(result.content[0].text);
+      console.log(`✅ Parsed dataset details:`, parsedData);
+      return res.status(200).json(parsedData);
+    }
+
+    // Fallback: return raw result
     return res.status(200).json(result);
   } catch (error) {
     console.error('❌ MCP dataset-details error:', error);
