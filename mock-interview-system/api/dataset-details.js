@@ -52,9 +52,11 @@ export default async function handler(req, res) {
 
   const { dataset_name, question_id, code_type } = req.body;
 
-  if (!dataset_name || !question_id || !code_type) {
+  // dataset_name is optional (can be empty string), question_id and code_type are required
+  if (question_id === undefined || question_id === null ||
+      code_type === undefined || code_type === null) {
     return res.status(400).json({
-      error: 'Missing required fields: dataset_name, question_id, code_type'
+      error: 'Missing required fields: question_id, code_type'
     });
   }
 
