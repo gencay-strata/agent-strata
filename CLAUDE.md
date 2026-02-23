@@ -45,9 +45,15 @@ Router functions in `agentClient.js`:
 - **Auth local**: ADC via `gcloud auth application-default login` (no key file needed)
 - **Auth Vercel**: Base64-encoded service account JSON → `GOOGLE_SERVICE_ACCOUNT_JSON_BASE64`
 - **MCP URL**: `https://strata-api-develop.stratascratch.com/mcp-L5fY-ByOAWaGnxciuiqysYj_45pm8REXg9d3frmFPmE` (token-authenticated develop endpoint)
-- **MCP calls**: Direct JSON-RPC from backend (`callMcpTool()` in `agentClient.js`)
+- **MCP calls**: Direct JSON-RPC from backend (`callMcpTool()` in `agentClient.js` and `api/dataset-details.js`)
 - **SSE fix**: `Accept: application/json, text/event-stream` header required on every MCP call
 - **Function calling**: `toolConfig: { functionCallingConfig: { mode: "ANY" } }` on first turn, `"AUTO"` after
+
+**CRITICAL - MCP Response Format:**
+- **Raw MCP response**: `{ content: [{ type: 'text', text: '{"datasets": [...]}' }], isError: false }`
+- **Must parse**: Extract `result.content[0].text` and `JSON.parse()` it before returning to frontend
+- **Why**: Vertex AI doesn't have native MCP support like OpenAI Agent Builder - we manually call MCP via JSON-RPC
+- **Implementation**: `api/dataset-details.js` handles parsing (lines 75-78)
 
 ### OpenAI (Fallback)
 - **Workflow ID (Interview)**: `wf_69785b59a66081908294851545870e8105ee6027e0451e3f`
@@ -114,10 +120,12 @@ VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
 - `vercel.json` must include `functions: { includeFiles: "server/**" }` for bundling
 
 ### DON'T
-- Don't call MCP directly from frontend
-- Don't parse agent responses as JSON (they're markdown strings)
+- Don't call MCP directly from frontend (use `/api/dataset-details` endpoint)
+- Don't parse agent chat responses as JSON (they're markdown strings)
 - Don't use Express in production (Vercel serverless only)
 - Don't add NEXT_PUBLIC_ vars to Vercel
+- Don't use falsy checks (`!dataset_name`) for optional string params - use `=== undefined` or `=== null`
+- Don't return raw MCP responses to frontend - always parse `content[0].text` first
 
 ## Running Locally
 ```bash
@@ -155,11 +163,36 @@ git push origin main   # Vercel auto-deploys
 6. Fixed Timer setState React warning (separate useEffect for onTick)
 7. Added Results page with score visualization
 8. Integrated Clerk authentication (modal sign-in/sign-up)
-9. Deployed to Vercel production successfully
+9. **Fixed dataset details display (Feb 18, 2026):**
+   - Created `/api/dataset-details` endpoint for manual MCP calls (Vertex AI lacks native MCP support)
+   - Fixed MCP response parsing: extract `content[0].text` and parse JSON before returning
+   - Fixed validation: allow empty string for `dataset_name` (only check `undefined/null`)
+   - Fixed frontend parameter passing: use object syntax `{dataset_name, question_id, code_type}`
+   - Fixed runtime hostname detection for `BACKEND_URL` (was hardcoded to localhost in production)
+10. Deployed to Vercel production successfully
 
 ## Known Issues & TODOs
-- [ ] Vercel deployment for Vertex AI blocked - waiting for service account key from Maks/Sergey
-- [ ] Gemini response format: currently returns raw JSON instead of markdown tables (needs prompt tuning)
+- [x] ~~Vercel deployment for Vertex AI~~ - **RESOLVED**: Production deployed successfully
+- [x] ~~Dataset details not showing~~ - **RESOLVED**: Created `/api/dataset-details` with MCP response parsing
 - [ ] Chat panel hint/question functionality
 - [ ] Optimize CSV loading for serverless cold starts
 - [ ] User profile/history page
+
+## Troubleshooting Guide
+
+### Dataset Details Not Showing (Vertex AI Migration Issue)
+**Symptoms**: Question metadata/table schemas missing on interview page, console shows "No datasets found in MCP response"
+
+**Root Cause**: OpenAI Agent Builder had native MCP support (`hostedMcpTool`) - agent fetched schemas automatically. Vertex AI lacks this, requiring manual frontend → backend → MCP flow.
+
+**Solution Steps**:
+1. **Backend**: Create `api/dataset-details.js` endpoint
+2. **Parse MCP response**: Extract `result.content[0].text` and `JSON.parse()` before returning
+3. **Validation**: Allow empty strings (`dataset_name: ''`) - only reject `undefined/null`
+4. **Frontend**: Call `mcpClient.getDatasetDetails({ dataset_name, question_id, code_type })` (object syntax!)
+5. **Runtime detection**: Use `window.location.hostname === 'localhost'` for `BACKEND_URL` (not `import.meta.env.PROD`)
+
+**Files Modified**:
+- `api/dataset-details.js` - MCP endpoint with response parsing (lines 75-78)
+- `src/services/mcpClient.js` - Runtime hostname detection (lines 6-9)
+- `src/pages/InterviewSession.jsx` - Object parameter syntax (line 211)
