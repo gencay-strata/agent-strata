@@ -4,9 +4,10 @@
  */
 
 // Use local backend server in development, deployed backend in production
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || (
-  import.meta.env.PROD ? '' : 'http://localhost:3001'
-);
+const BACKEND_URL =
+  typeof window !== 'undefined' && window.location.hostname === 'localhost'
+    ? 'http://localhost:3001'
+    : '';
 
 class MCPClient {
   constructor() {
