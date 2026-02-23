@@ -200,48 +200,40 @@ const InterviewSession = () => {
     }
   };
 
-  // Fetch table schema and sample data from MCP using get_datasets_details via Interview Agent
+  // Fetch table schema and sample data from MCP - DIRECT MCP CALL (same as Interview Agent)
   const fetchTableSchemaFromMCP = async (questionId, questionIndex) => {
     try {
       const question = questions[questionIndex];
 
-      console.log(`📡 Fetching MCP dataset details for question ${questionId} via Interview Agent...`);
+      console.log(`📡 Fetching MCP dataset details for question ${questionId} - DIRECT MCP...`);
 
-      // Send background message to agent to fetch dataset details
-      const codeType = filters?.language === 'python' ? 2 : 1;
-      const agentResponse = await mcpClient.sendAgentMessage({
-        message: `Get dataset details for question ${questionId}. Use the get_datasets_details tool with question_id=${questionId} and code_type=${codeType}. Return the dataset schema information.`,
-        context: {
-          question_id: questionId,
-          action: 'fetch_schema'
-        }
+      // Direct MCP call with OBJECT parameter (not positional!)
+      const data = await mcpClient.getDatasetDetails({
+        dataset_name: '', // Not needed, question_id determines dataset
+        question_id: questionId,
+        code_type: filters?.language === 'python' ? 2 : 1
       });
 
-      console.log(`✅ Agent response received:`, agentResponse);
+      console.log(`✅ MCP dataset details received:`, data);
 
-      // Extract dataset info from agent response
+      // Parse MCP response
       let parsedData = null;
-      const responseText = agentResponse.response || agentResponse;
-
-      // Try to extract JSON from agent response (could be markdown with JSON blocks)
-      if (typeof responseText === 'string') {
-        // Look for JSON in markdown code blocks or raw JSON
-        const jsonMatch = responseText.match(/```json\s*([\s\S]*?)```/) ||
-                         responseText.match(/\{[\s\S]*"datasets"[\s\S]*\}/);
-
-        if (jsonMatch) {
+      if (Array.isArray(data)) {
+        const textContent = data.find(block => block.type === 'text');
+        if (textContent) {
           try {
-            parsedData = JSON.parse(jsonMatch[1] || jsonMatch[0]);
+            parsedData = JSON.parse(textContent.text);
           } catch (e) {
-            console.error('Failed to parse JSON from agent response:', e);
+            console.error('Failed to parse dataset details:', e);
+            return;
           }
         }
-      } else if (typeof responseText === 'object') {
-        parsedData = responseText;
+      } else if (data.datasets) {
+        parsedData = data;
       }
 
       if (!parsedData || !parsedData.datasets) {
-        console.log('⚠️ No datasets found in agent response. Response:', responseText);
+        console.log('⚠️ No datasets found in MCP response');
         return;
       }
 
