@@ -1,4 +1,4 @@
-import { callInterviewAgent } from '../server/agentClient.js';
+import { callInterviewAgentRouted } from '../server/agentClient.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -10,7 +10,7 @@ export default async function handler(req, res) {
 
     console.log('📨 Agent request:', { message, action: context?.action });
 
-    const agentResponse = await callInterviewAgent({ message, context });
+    const agentResponse = await callInterviewAgentRouted({ message, context });
     console.log('✅ Agent response received');
 
     return res.json({

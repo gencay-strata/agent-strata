@@ -1,4 +1,4 @@
-import { callReviewAgent } from '../server/agentClient.js';
+import { callReviewAgentRouted } from '../server/agentClient.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -13,7 +13,7 @@ export default async function handler(req, res) {
       submissionCount: submissions?.length
     });
 
-    const reviewResponse = await callReviewAgent({
+    const reviewResponse = await callReviewAgentRouted({
       questions,
       submissions,
       filters,

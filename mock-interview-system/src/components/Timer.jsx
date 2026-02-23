@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Clock } from 'lucide-react';
 import '../styles/Timer.css';
 
@@ -12,15 +12,15 @@ const Timer = ({ initialTime, onTimeUp, onTick }) => {
     }
 
     const interval = setInterval(() => {
-      setTimeRemaining((prev) => {
-        const newTime = prev - 1;
-        if (onTick) onTick(newTime);
-        return newTime;
-      });
+      setTimeRemaining((prev) => prev - 1);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [timeRemaining, onTimeUp, onTick]);
+  }, [timeRemaining, onTimeUp]);
+
+  useEffect(() => {
+    if (onTick) onTick(timeRemaining);
+  }, [timeRemaining]);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
