@@ -207,18 +207,12 @@ const InterviewSession = () => {
 
       console.log(`📡 Fetching MCP dataset details for question ${questionId}...`);
 
-      // Call MCP with question_id (it will return the correct datasets)
-      const response = await fetch('http://localhost:3001/api/dataset-details', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          dataset_name: '', // Not used, question_id determines the dataset
-          question_id: questionId,
-          code_type: filters?.language || 'sql'
-        })
-      });
-
-      const data = await response.json();
+      // Use mcpClient instead of hardcoded localhost
+      const data = await mcpClient.getDatasetDetails(
+        '', // dataset_name not needed, question_id determines it
+        questionId,
+        filters?.language || 'sql'
+      );
       console.log(`✅ Dataset details received:`, data);
 
       // Parse MCP response
