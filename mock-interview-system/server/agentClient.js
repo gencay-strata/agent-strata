@@ -815,11 +815,64 @@ Generate a detailed performance report following the JSON schema in your instruc
   }
 }
 
+export async function callPerformanceAgent({ sessionId, userId, questions, totalTime, interviewType, difficultyFilter }) {
+  const performanceMessage = `PERFORMANCE REPORT REQUEST
+${JSON.stringify({
+  sessionId,
+  userId,
+  date: new Date().toISOString(),
+  questions: questions.map(q => ({
+    question_id: q.question_id,
+    question_title: q.question_title,
+    difficulty: q.difficulty,
+    company: q.company,
+    topic_tags: q.topic_tags || [],
+    score: q.score,
+    hints_requested: q.hints_requested || 0,
+    time_spent_seconds: q.time_spent_seconds,
+    test_runs: q.test_runs || 0,
+    submit_runs: q.submit_runs || 0,
+    errors: q.errors || []
+  })),
+  totalTime,
+  interviewType,
+  difficultyFilter
+}, null, 2)}
+
+Generate a detailed performance report following the JSON schema in your instructions.`;
+
+  console.log("📨 Calling Performance Agent (OpenAI Agent Builder)...");
+
+  const performanceAgent = new Agent({
+    name: "Performance Agent",
+    instructions: PERFORMANCE_INSTRUCTIONS,
+    tools: [mcp],
+    model: "gpt-5.2"
+  });
+
+  const runner = new Runner({
+    agent: performanceAgent,
+    input: performanceMessage
+  });
+
+  const result = await runner.run();
+  const text = result.output.text;
+
+  console.log("✅ OpenAI Performance Agent response received");
+
+  // Parse JSON response
+  try {
+    const reportData = JSON.parse(text);
+    return { success: true, report: reportData };
+  } catch (error) {
+    console.error("❌ Failed to parse Performance Agent JSON:", error);
+    throw new Error("Performance Agent returned invalid JSON");
+  }
+}
+
 export async function callPerformanceAgentRouted(params) {
   if (PROVIDER === "vertex") return callPerformanceAgentVertex(params);
-
-  // OpenAI fallback would go here if needed
-  throw new Error("Performance Agent only available with Vertex AI provider");
+  return callPerformanceAgent(params);
 }
 
 export default {
@@ -829,6 +882,7 @@ export default {
   callReviewAgentVertex,
   callInterviewAgentRouted,
   callReviewAgentRouted,
+  callPerformanceAgent,
   callPerformanceAgentVertex,
   callPerformanceAgentRouted,
 };
