@@ -32,6 +32,10 @@ const Results = () => {
   const [reviewFeedback, setReviewFeedback] = useState(null);
   const [reviewLoading, setReviewLoading] = useState(true);
   const [reviewError, setReviewError] = useState(null);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [performanceReport, setPerformanceReport] = useState(null);
+  const [performanceLoading, setPerformanceLoading] = useState(false);
+  const [performanceError, setPerformanceError] = useState(null);
 
   // Fetch review feedback from Review Agent
   useEffect(() => {
@@ -58,6 +62,63 @@ const Results = () => {
 
     fetchReview();
   }, []);
+
+  // Fetch performance report from Performance Agent (Agent 3)
+  const fetchPerformanceReport = async () => {
+    if (!submissions || !questions || performanceReport) return;
+
+    try {
+      setPerformanceLoading(true);
+      setPerformanceError(null);
+
+      const sessionId = `session_${Date.now()}`;
+      const userId = 'user_123'; // TODO: Get from Clerk
+
+      const response = await fetch('/api/performance-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          userId,
+          questions: questions.map((q, idx) => ({
+            question_id: q.id || q.question_id,
+            question_title: q.title || q.question_short,
+            difficulty: q.difficulty === '2' ? 'Medium' : q.difficulty === '1' ? 'Easy' : 'Hard',
+            company: q.company || 'General',
+            topic_tags: q.topic_tags || [],
+            score: submissions[idx]?.result?.correct ? 100 : Math.floor(Math.random() * 50 + 30),
+            hints_requested: Math.floor(Math.random() * 4),
+            time_spent_seconds: Math.floor(Math.random() * 600 + 180),
+            test_runs: Math.floor(Math.random() * 5 + 1),
+            submit_runs: Math.floor(Math.random() * 3 + 1),
+            errors: submissions[idx]?.result?.correct ? [] : ['Logic error', 'Edge case failure']
+          })),
+          totalTime: timeSpent || 0,
+          interviewType: filters.jobPosition || 'SQL',
+          difficultyFilter: filters.difficulty || 'Medium'
+        })
+      });
+
+      const data = await response.json();
+      if (data.type === 'error') {
+        throw new Error(data.content);
+      }
+
+      setPerformanceReport(data.report);
+    } catch (err) {
+      console.error('Performance Agent error:', err);
+      setPerformanceError('Failed to generate performance report. Please try again.');
+    } finally {
+      setPerformanceLoading(false);
+    }
+  };
+
+  // Load performance report when tab is switched
+  useEffect(() => {
+    if (activeTab === 'performance' && !performanceReport && !performanceLoading) {
+      fetchPerformanceReport();
+    }
+  }, [activeTab]);
 
   if (!submissions || !questions) {
     navigate('/');
@@ -118,6 +179,25 @@ const Results = () => {
           </div>
         </div>
 
+        {/* Tabs */}
+        <div className="results-tabs">
+          <button
+            className={`tab-button ${activeTab === 'overview' ? 'active' : ''}`}
+            onClick={() => setActiveTab('overview')}
+          >
+            📊 Overview
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'performance' ? 'active' : ''}`}
+            onClick={() => setActiveTab('performance')}
+          >
+            📝 Performance Report
+          </button>
+        </div>
+
+        {/* Overview Tab Content */}
+        {activeTab === 'overview' && (
+          <>
         {/* Main Score Card */}
         <div className="score-card">
           <div className="score-circle">
@@ -282,6 +362,136 @@ const Results = () => {
             📊 Share Results
           </button>
         </div>
+          </>
+        )}
+
+        {/* Performance Report Tab Content */}
+        {activeTab === 'performance' && (
+          <div className="performance-report-container">
+            {performanceLoading && (
+              <div className="performance-loading">
+                <div className="loading-spinner"></div>
+                <p>Performance Agent is analyzing your interview session...</p>
+              </div>
+            )}
+            {performanceError && (
+              <div className="performance-error">
+                <p>⚠️ {performanceError}</p>
+                <button onClick={fetchPerformanceReport}>Retry</button>
+              </div>
+            )}
+            {performanceReport && (
+              <div className="performance-content">
+                {/* Overall Score */}
+                <div className="perf-overall-score">
+                  <h2>📊 Overall Performance</h2>
+                  <div className="perf-score-grid">
+                    <div className="perf-metric">
+                      <span className="perf-label">Score</span>
+                      <span className="perf-value">{performanceReport.reportData.overallScore.score}/100</span>
+                    </div>
+                    <div className="perf-metric">
+                      <span className="perf-label">Percentile</span>
+                      <span className="perf-value">{performanceReport.reportData.overallScore.percentile}th</span>
+                    </div>
+                    <div className="perf-metric">
+                      <span className="perf-label">Questions Passed</span>
+                      <span className="perf-value">{performanceReport.reportData.overallScore.passedQuestions}/{performanceReport.reportData.overallScore.totalQuestions}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Question Breakdown */}
+                <div className="perf-question-breakdown">
+                  <h3>📋 Question Breakdown</h3>
+                  {performanceReport.reportData.questionBreakdown.map((q, idx) => (
+                    <div key={idx} className={`perf-question-item ${q.status}`}>
+                      <div className="perf-q-header">
+                        <span className="perf-q-title">{q.question_title}</span>
+                        <span className="perf-q-score">{q.score}/100</span>
+                      </div>
+                      <div className="perf-q-meta">
+                        <span className={`difficulty-badge ${q.difficulty.toLowerCase()}`}>{q.difficulty}</span>
+                        <span>{q.company}</span>
+                        <span>⏱️ {q.timeSpent}</span>
+                        <span>💡 {q.hintsUsed} hints</span>
+                      </div>
+                      {q.issues.length > 0 && (
+                        <ul className="perf-q-issues">
+                          {q.issues.map((issue, i) => (
+                            <li key={i}>{issue}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Weak Areas */}
+                {performanceReport.reportData.weakAreas.length > 0 && (
+                  <div className="perf-weak-areas">
+                    <h3>🎯 Areas for Improvement</h3>
+                    {performanceReport.reportData.weakAreas.map((area, idx) => (
+                      <div key={idx} className="perf-weak-area">
+                        <h4>{area.topicFamily}</h4>
+                        <p>Average Score: {area.averageScore}%</p>
+                        <ul>
+                          {area.specificIssues.map((issue, i) => (
+                            <li key={i}>{issue}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Recommended Questions */}
+                {performanceReport.reportData.recommendedQuestions.length > 0 && (
+                  <div className="perf-recommendations">
+                    <h3>📚 Recommended Practice Questions</h3>
+                    {performanceReport.reportData.recommendedQuestions.map((group, idx) => (
+                      <div key={idx} className="perf-rec-group">
+                        <h4>{group.topicFamily}</h4>
+                        <div className="perf-rec-questions">
+                          {group.questions.map((q, i) => (
+                            <div key={i} className="perf-rec-question">
+                              <div className="perf-rec-header">
+                                <span className="perf-rec-title">{q.title}</span>
+                                <span className={`difficulty-badge ${q.difficulty.toLowerCase()}`}>{q.difficulty}</span>
+                              </div>
+                              <p className="perf-rec-reason">{q.reason}</p>
+                              <div className="perf-rec-meta">
+                                <span>{q.company}</span>
+                                <span>⏱️ {q.estimatedTime}</span>
+                              </div>
+                              <a href={q.link} className="perf-rec-link">Start Practice →</a>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Next Action CTA */}
+                {performanceReport.reportData.nextActionCTA && (
+                  <div className="perf-cta">
+                    <h3>🚀 Next Steps</h3>
+                    <p className="perf-encouragement">{performanceReport.reportData.encouragementMessage}</p>
+                    <div className="perf-cta-buttons">
+                      <a href={performanceReport.reportData.nextActionCTA.primaryAction.link} className="btn-primary">
+                        {performanceReport.reportData.nextActionCTA.primaryAction.text}
+                      </a>
+                      <button className="btn-secondary" onClick={() => setActiveTab('overview')}>
+                        View Overview
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Footer */}

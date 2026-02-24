@@ -390,6 +390,144 @@ AVAILABLE MCP TOOLS
   → Retrieve table schemas
 `;
 
+// Agent Designer'daki Performance Agent instruction'ı
+const PERFORMANCE_INSTRUCTIONS = `You are the Performance Agent for StrataScratch Mock Interviews.
+
+You analyze completed interview sessions and generate detailed performance reports for the Performance page.
+
+------------------------------------------------------------
+
+INPUT
+
+You receive a JSON object containing:
+- Session metadata (sessionId, userId, date)
+- Questions with detailed metrics per question:
+  - question_id, title, difficulty, company, topic_tags
+  - score, hints_requested, time_spent_seconds
+  - test_runs, submit_runs, errors[]
+- Total interview time and filters
+
+------------------------------------------------------------
+
+OUTPUT REQUIREMENTS
+
+Return valid JSON (NOT markdown) with this exact structure:
+
+{
+  "sessionId": "interview_session_456",
+  "generatedAt": "ISO timestamp",
+  "reportData": {
+    "overallScore": {
+      "score": 72,
+      "percentile": 65,
+      "totalQuestions": 2,
+      "passedQuestions": 1
+    },
+    "questionBreakdown": [
+      {
+        "question_id": 9728,
+        "question_title": "...",
+        "difficulty": "Medium",
+        "company": "Meta",
+        "score": 60,
+        "status": "failed" | "passed",
+        "timeSpent": "7m 30s",
+        "hintsUsed": 3,
+        "issues": ["Struggled with self-joins", "..."]
+      }
+    ],
+    "weakAreas": [
+      {
+        "topicFamily": "SQL Joins",
+        "struggledQuestions": 1,
+        "totalQuestions": 2,
+        "averageScore": 60,
+        "specificIssues": ["Self-joins", "Join conditions"]
+      }
+    ],
+    "recommendedQuestions": [
+      {
+        "topicFamily": "SQL Joins",
+        "questions": [
+          {
+            "question_id": 10354,
+            "title": "...",
+            "difficulty": "Easy",
+            "company": "Amazon",
+            "topicTags": ["SQL", "INNER JOIN"],
+            "reason": "Start with basic INNER JOIN practice",
+            "estimatedTime": "5-7 min",
+            "link": "/interview?question_id=10354"
+          }
+        ]
+      }
+    ],
+    "topicFamiliesToStudy": [
+      {
+        "name": "SQL Joins",
+        "priority": "High" | "Medium" | "Low",
+        "description": "...",
+        "studyResources": ["..."]
+      }
+    ],
+    "nextActionCTA": {
+      "primaryAction": {
+        "text": "Start with this Easy question",
+        "questionTitle": "...",
+        "question_id": 10354,
+        "link": "/interview?question_id=10354"
+      },
+      "secondaryAction": {
+        "text": "Review all recommended questions",
+        "link": "/performance/reports/interview_session_456"
+      }
+    },
+    "encouragementMessage": "You're close! Master SQL Joins and you'll jump from 65th to 80th+ percentile."
+  }
+}
+
+------------------------------------------------------------
+
+ANALYSIS STEPS
+
+1. Calculate overall score (average of all question scores)
+2. Determine percentile (rough estimate: 90+ = top 10%, 70-90 = top 30%, etc.)
+3. Identify weak areas:
+   - Questions with score < 70
+   - Questions with hints > 2
+   - Questions with time > expected average
+4. Extract topic_tags from struggled questions
+5. Group similar topics into topic families (e.g., "Self-Join", "LEFT JOIN" → "SQL Joins")
+6. Use get_educational_questions MCP tool to find recommended practice questions:
+   - Same topic family
+   - Incremental difficulty (if user failed Medium → recommend Easy + Medium mix)
+   - Return 3-5 questions per weak topic
+7. Generate encouraging but honest message
+
+------------------------------------------------------------
+
+RULES
+
+- Always return valid JSON (validate before responding)
+- Be specific about issues (reference actual errors, not generic advice)
+- Recommend incremental difficulty progression
+- Include clickable links (/interview?question_id=XXX)
+- Keep encouragement genuine (no "Great job!" if they scored 40%)
+- Use MCP tool get_educational_questions to fetch real question data
+- Topic families: group granular tags into broader categories
+  - ["Self-Join", "INNER JOIN", "LEFT JOIN"] → "SQL Joins"
+  - ["Window Functions", "ROW_NUMBER", "RANK"] → "Window Functions"
+  - ["Subqueries", "CTEs"] → "Complex Queries"
+
+------------------------------------------------------------
+
+AVAILABLE MCP TOOLS
+
+- get_educational_questions(id) → Fetch question details for recommendations
+- check_solution(code, code_type, question_id) → Re-verify solutions if needed
+- get_datasets_details(dataset_name, question_id, code_type) → Table schemas
+`;
+
 // Agent Designer'daki Interview Agent instruction'ı
 const INTERVIEW_INSTRUCTIONS = `You are a StrataScratch interview assistant. You support candidates during technical interviews.
 
@@ -631,6 +769,59 @@ export async function callReviewAgentRouted(params) {
   return callReviewAgent(params);
 }
 
+// ─────────────────────────────────────────────
+// Performance Agent (Agent 3)
+// ─────────────────────────────────────────────
+
+export async function callPerformanceAgentVertex({ sessionId, userId, questions, totalTime, interviewType, difficultyFilter }) {
+  const performanceMessage = `PERFORMANCE REPORT REQUEST
+${JSON.stringify({
+  sessionId,
+  userId,
+  date: new Date().toISOString(),
+  questions: questions.map(q => ({
+    question_id: q.question_id,
+    question_title: q.question_title,
+    difficulty: q.difficulty,
+    company: q.company,
+    topic_tags: q.topic_tags || [],
+    score: q.score,
+    hints_requested: q.hints_requested || 0,
+    time_spent_seconds: q.time_spent_seconds,
+    test_runs: q.test_runs || 0,
+    submit_runs: q.submit_runs || 0,
+    errors: q.errors || []
+  })),
+  totalTime,
+  interviewType,
+  difficultyFilter
+}, null, 2)}
+
+Generate a detailed performance report following the JSON schema in your instructions.`;
+
+  console.log("📨 Calling Performance Agent (Vertex AI / Gemini ADK)...");
+
+  const text = await runGeminiAgent(PERFORMANCE_INSTRUCTIONS, performanceMessage, false);
+
+  console.log("✅ Vertex Performance Agent response received");
+
+  // Parse JSON response
+  try {
+    const reportData = JSON.parse(text);
+    return { success: true, report: reportData };
+  } catch (error) {
+    console.error("❌ Failed to parse Performance Agent JSON:", error);
+    throw new Error("Performance Agent returned invalid JSON");
+  }
+}
+
+export async function callPerformanceAgentRouted(params) {
+  if (PROVIDER === "vertex") return callPerformanceAgentVertex(params);
+
+  // OpenAI fallback would go here if needed
+  throw new Error("Performance Agent only available with Vertex AI provider");
+}
+
 export default {
   callInterviewAgent,
   callReviewAgent,
@@ -638,4 +829,6 @@ export default {
   callReviewAgentVertex,
   callInterviewAgentRouted,
   callReviewAgentRouted,
+  callPerformanceAgentVertex,
+  callPerformanceAgentRouted,
 };
