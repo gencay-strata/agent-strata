@@ -847,12 +847,14 @@ Generate a detailed performance report following the JSON schema in your instruc
     name: "Performance Agent",
     instructions: PERFORMANCE_INSTRUCTIONS,
     tools: [mcp],
-    model: "gpt-5.2"
+    model: "gpt-5.2",
+    enabledHandoffs: [] // Explicitly set empty handoffs to avoid undefined errors
   });
 
   const runner = new Runner({
     agent: performanceAgent,
-    input: performanceMessage
+    input: performanceMessage,
+    store: null // Explicitly set null store to avoid initialization issues
   });
 
   const result = await runner.run();
