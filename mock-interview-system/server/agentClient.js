@@ -757,7 +757,7 @@ Analyze this completed interview and generate a comprehensive performance review
 // Provider router — OpenAI (default) or Vertex
 // ─────────────────────────────────────────────
 
-const PROVIDER = process.env.AGENT_PROVIDER || "openai";
+const PROVIDER = process.env.AGENT_PROVIDER || "vertex";
 
 export async function callInterviewAgentRouted(params) {
   if (PROVIDER === "vertex") return callInterviewAgentVertex(params);
