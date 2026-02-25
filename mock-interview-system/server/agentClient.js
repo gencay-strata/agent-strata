@@ -805,12 +805,19 @@ Generate a detailed performance report following the JSON schema in your instruc
 
   console.log("✅ Vertex Performance Agent response received");
 
-  // Parse JSON response
+  // Parse JSON response - strip markdown code blocks if present
   try {
-    const reportData = JSON.parse(text);
+    // Remove markdown code blocks (```json ... ``` or ``` ... ```)
+    let cleanedText = text.trim();
+    if (cleanedText.startsWith('```')) {
+      cleanedText = cleanedText.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
+    }
+
+    const reportData = JSON.parse(cleanedText);
     return { success: true, report: reportData };
   } catch (error) {
     console.error("❌ Failed to parse Performance Agent JSON:", error);
+    console.error("Raw response:", text);
     throw new Error("Performance Agent returned invalid JSON");
   }
 }
