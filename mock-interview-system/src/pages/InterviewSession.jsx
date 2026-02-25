@@ -527,11 +527,11 @@ const InterviewSession = () => {
           return [...submissions, submission];
         })();
 
-        // Move to next question if correct
-        if (isCorrect && currentQuestionIndex < questions.length - 1) {
+        // Move to next question after submission (correct or incorrect)
+        if (currentQuestionIndex < questions.length - 1) {
           setTimeout(() => moveToNextQuestion(), 2000);
-        } else if (currentQuestionIndex >= questions.length - 1) {
-          // Interview complete
+        } else {
+          // Interview complete - all questions submitted
           setTimeout(() => {
             navigate('/results', {
               state: {
@@ -587,11 +587,11 @@ const InterviewSession = () => {
 
         setChatMessages(prev => [...prev, resultMessage]);
 
-        // Move to next question if available
-        if (parsedResult.correct && currentQuestionIndex < questions.length - 1) {
+        // Move to next question after submission (correct or incorrect)
+        if (currentQuestionIndex < questions.length - 1) {
           setTimeout(() => moveToNextQuestion(), 2000);
-        } else if (currentQuestionIndex >= questions.length - 1) {
-          // Interview complete
+        } else {
+          // Interview complete - all questions submitted
           setTimeout(() => {
             navigate('/results', {
               state: {
