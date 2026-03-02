@@ -37,12 +37,26 @@ const Results = () => {
   const [performanceLoading, setPerformanceLoading] = useState(false);
   const [performanceError, setPerformanceError] = useState(null);
 
-  // Save interview to localStorage on mount
+  // Save interview to localStorage on mount (only if new interview)
   useEffect(() => {
     if (!submissions || !questions) return;
 
     const saveInterview = () => {
       try {
+        // Check if this interview already exists (avoid duplicates when viewing old reports)
+        const history = JSON.parse(localStorage.getItem('interview_history') || '[]');
+
+        // Use first question's submission timestamp to identify unique interviews
+        const firstSubmissionTime = submissions[0]?.timestamp;
+        const alreadyExists = history.some(interview =>
+          interview.firstSubmissionTime === firstSubmissionTime?.toISOString()
+        );
+
+        if (alreadyExists) {
+          console.log('⏭️ Interview already in history, skipping save');
+          return;
+        }
+
         const sessionId = `session_${Date.now()}`;
         const score = submissions.length > 0
           ? Math.round(submissions.reduce((sum, s) => sum + (s.result?.correct ? 100 : 0), 0) / submissions.length)
@@ -60,10 +74,10 @@ const Results = () => {
           status: 'completed',
           filters,
           questions,
-          submissions
+          submissions,
+          firstSubmissionTime: firstSubmissionTime?.toISOString()
         };
 
-        const history = JSON.parse(localStorage.getItem('interview_history') || '[]');
         history.push(interviewData);
         localStorage.setItem('interview_history', JSON.stringify(history));
         console.log('✅ Interview saved to history');

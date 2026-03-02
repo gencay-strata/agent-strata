@@ -6,8 +6,8 @@
 
 /* Navbar */
 .performance-navbar {
-  background: #252424;
-  border-bottom: 1px solid #333;
+  background: #fff;
+  border-bottom: 1px solid #e0e0e0;
   padding: 1rem 2rem;
 }
 
@@ -38,7 +38,7 @@
 }
 
 .nav-links span {
-  color: #fff;
+  color: #252424;
   cursor: pointer;
   font-size: 0.9rem;
   transition: color 0.2s;
