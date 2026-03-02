@@ -20,6 +20,20 @@ const ChatPanel = ({ messages, isLoading }) => {
     });
   };
 
+  const formatMarkdown = (text) => {
+    return text
+      // Code blocks with backticks
+      .replace(/```(\w*)\n?([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+      // Inline code
+      .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
+      // Bold
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      // Italic
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      // Line breaks
+      .replace(/\n/g, '<br/>');
+  };
+
   return (
     <div className="chat-panel">
       <div className="messages-container">
@@ -40,14 +54,10 @@ const ChatPanel = ({ messages, isLoading }) => {
                   {formatTimestamp(msg.timestamp)}
                 </span>
               </div>
-              <div className="message-text">
-                {msg.content.split('\n').map((line, i) => (
-                  <React.Fragment key={i}>
-                    {line}
-                    {i < msg.content.split('\n').length - 1 && <br />}
-                  </React.Fragment>
-                ))}
-              </div>
+              <div
+                className="message-text"
+                dangerouslySetInnerHTML={{ __html: formatMarkdown(msg.content) }}
+              />
             </div>
           </div>
         ))}

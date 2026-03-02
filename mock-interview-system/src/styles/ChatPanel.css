@@ -143,3 +143,39 @@
 .chat-panel::-webkit-scrollbar-thumb:hover {
   background: #4d4d4d;
 }
+
+/* Markdown formatting */
+.message-text strong {
+  font-weight: 700;
+  color: #fff;
+}
+
+.message-text em {
+  font-style: italic;
+}
+
+.message-text code.inline-code {
+  background: #1e1e1e;
+  color: #00A699;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 0.9em;
+  border: 1px solid #3d3d3d;
+}
+
+.message-text pre {
+  background: #1e1e1e;
+  border: 1px solid #3d3d3d;
+  border-radius: 8px;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 0.5rem 0;
+}
+
+.message-text pre code {
+  color: #e0e0e0;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
