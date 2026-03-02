@@ -376,11 +376,13 @@ Use star ratings (e.g., ⭐⭐⭐⭐☆)
 **IMPORTANT: Format recommended questions as clickable links:**
 
 For each recommended question, use get_educational_questions(id) to fetch the title, then format as:
-- [Question Title](https://platform.stratascratch.com/coding/{id}/{title-with-dashes}/official-solution?code_type=1)
+- [Question Title](https://platform.stratascratch.com/coding/{id}-{title-with-dashes}/official-solution?code_type=1)
 
 Example:
 - Question ID 10065, Title "Salary Less Than Twice The Average"
-- Formatted link: [Salary Less Than Twice The Average](https://platform.stratascratch.com/coding/10065/salary-less-than-twice-the-average/official-solution?code_type=1)
+- Formatted link: [Salary Less Than Twice The Average](https://platform.stratascratch.com/coding/10065-salary-less-than-twice-the-average/official-solution?code_type=1)
+
+CRITICAL: Use DASH between ID and title, NOT slash!
 
 **Title formatting rules:**
 1. Convert title to lowercase
