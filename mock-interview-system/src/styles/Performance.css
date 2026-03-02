@@ -1,0 +1,259 @@
+.performance-container {
+  min-height: 100vh;
+  background: #f8f9fa;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Navbar */
+.performance-navbar {
+  background: #252424;
+  border-bottom: 1px solid #333;
+  padding: 1rem 2rem;
+}
+
+.navbar-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+}
+
+.logo {
+  color: #00A699;
+  font-size: 1.5rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+}
+
+.nav-links span {
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+}
+
+.nav-links span:hover {
+  color: #00A699;
+}
+
+/* Content */
+.performance-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+/* Header */
+.performance-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.performance-header h1 {
+  font-size: 2.5rem;
+  color: #252424;
+  margin-bottom: 0.5rem;
+}
+
+.performance-header p {
+  font-size: 1.1rem;
+  color: #666;
+}
+
+/* Summary Stats */
+.summary-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.stat-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #00A699;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.95rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* History Section */
+.history-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.history-section h2 {
+  font-size: 1.8rem;
+  color: #252424;
+  margin-bottom: 1.5rem;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.empty-state p {
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.btn-primary {
+  background: #00A699;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #008c82;
+}
+
+/* Table */
+.history-table {
+  overflow-x: auto;
+}
+
+.history-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.history-table th {
+  background: #f8f9fa;
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #252424;
+  border-bottom: 2px solid #e0e0e0;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.history-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+  color: #333;
+}
+
+.history-table tr:hover {
+  background: #f8f9fa;
+}
+
+/* Badges */
+.score-badge {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.score-badge.good {
+  background: #d4edda;
+  color: #155724;
+}
+
+.score-badge.needs-work {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: capitalize;
+}
+
+.status-badge.completed {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge.incomplete {
+  background: #fff3cd;
+  color: #856404;
+}
+
+/* View Report Button */
+.btn-view-report {
+  background: #00A699;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-view-report:hover {
+  background: #008c82;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .summary-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .summary-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .nav-links {
+    display: none;
+  }
+
+  .history-table {
+    font-size: 0.85rem;
+  }
+}

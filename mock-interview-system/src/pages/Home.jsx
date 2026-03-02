@@ -31,7 +31,15 @@ function Home() {
               </SignInButton>
             </SignedOut>
             <SignedIn>
-              <UserButton />
+              <UserButton>
+                <UserButton.MenuItems>
+                  <UserButton.Link
+                    label="Performance History"
+                    labelIcon={<span>📊</span>}
+                    href="/performance"
+                  />
+                </UserButton.MenuItems>
+              </UserButton>
             </SignedIn>
           </div>
         </div>

@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import LandingPage from './pages/LandingPage';
 import InterviewSession from './pages/InterviewSession';
 import Results from './pages/Results';
+import Performance from './pages/Performance';
 
 const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -57,6 +58,21 @@ function App() {
               <>
                 <SignedIn>
                   <Results />
+                </SignedIn>
+                <SignedOut>
+                  <RedirectToSignIn />
+                </SignedOut>
+              </>
+            }
+          />
+
+          {/* Performance page - Protected */}
+          <Route
+            path="/performance"
+            element={
+              <>
+                <SignedIn>
+                  <Performance />
                 </SignedIn>
                 <SignedOut>
                   <RedirectToSignIn />

@@ -37,6 +37,44 @@ const Results = () => {
   const [performanceLoading, setPerformanceLoading] = useState(false);
   const [performanceError, setPerformanceError] = useState(null);
 
+  // Save interview to localStorage on mount
+  useEffect(() => {
+    if (!submissions || !questions) return;
+
+    const saveInterview = () => {
+      try {
+        const sessionId = `session_${Date.now()}`;
+        const score = submissions.length > 0
+          ? Math.round(submissions.reduce((sum, s) => sum + (s.result?.correct ? 100 : 0), 0) / submissions.length)
+          : 0;
+
+        const interviewData = {
+          id: sessionId,
+          date: new Date().toISOString(),
+          type: filters?.language || 'SQL',
+          company: questions[0]?.company || 'Various',
+          questionCount: questions.length,
+          score,
+          duration: timeSpent || 0,
+          durationFormatted: `${Math.floor((timeSpent || 0) / 60)}m ${(timeSpent || 0) % 60}s`,
+          status: 'completed',
+          filters,
+          questions,
+          submissions
+        };
+
+        const history = JSON.parse(localStorage.getItem('interview_history') || '[]');
+        history.push(interviewData);
+        localStorage.setItem('interview_history', JSON.stringify(history));
+        console.log('✅ Interview saved to history');
+      } catch (error) {
+        console.error('Failed to save interview:', error);
+      }
+    };
+
+    saveInterview();
+  }, []);
+
   // Fetch review feedback from Review Agent
   useEffect(() => {
     if (!submissions || !questions) return;
@@ -164,7 +202,15 @@ const Results = () => {
             </nav>
           </div>
           <div className="navbar-right">
-            <UserButton afterSignOutUrl="/" />
+            <UserButton afterSignOutUrl="/">
+              <UserButton.MenuItems>
+                <UserButton.Link
+                  label="Performance History"
+                  labelIcon={<span>📊</span>}
+                  href="/performance"
+                />
+              </UserButton.MenuItems>
+            </UserButton>
           </div>
         </div>
       </div>
