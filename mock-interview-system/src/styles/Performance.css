@@ -220,7 +220,13 @@
   color: #856404;
 }
 
-/* View Report Button */
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 .btn-view-report {
   background: #00A699;
   color: #fff;
@@ -235,6 +241,19 @@
 
 .btn-view-report:hover {
   background: #008c82;
+}
+
+.btn-delete {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  transition: transform 0.2s;
+}
+
+.btn-delete:hover {
+  transform: scale(1.2);
 }
 
 /* Responsive */

@@ -50,6 +50,20 @@ function Performance() {
     });
   };
 
+  const handleDeleteInterview = (interviewId) => {
+    if (!window.confirm('Are you sure you want to delete this interview?')) return;
+
+    try {
+      const history = JSON.parse(localStorage.getItem('interview_history') || '[]');
+      const updatedHistory = history.filter(i => i.id !== interviewId);
+      localStorage.setItem('interview_history', JSON.stringify(updatedHistory));
+      setInterviewHistory(updatedHistory.reverse());
+      console.log('🗑️ Interview deleted');
+    } catch (error) {
+      console.error('Failed to delete interview:', error);
+    }
+  };
+
   return (
     <div className="performance-container">
       {/* Header */}
@@ -147,12 +161,21 @@ function Performance() {
                         </span>
                       </td>
                       <td>
-                        <button
-                          className="btn-view-report"
-                          onClick={() => handleViewReport(interview)}
-                        >
-                          View Report
-                        </button>
+                        <div className="action-buttons">
+                          <button
+                            className="btn-view-report"
+                            onClick={() => handleViewReport(interview)}
+                          >
+                            View Report
+                          </button>
+                          <button
+                            className="btn-delete"
+                            onClick={() => handleDeleteInterview(interview.id)}
+                            title="Delete interview"
+                          >
+                            🗑️
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
