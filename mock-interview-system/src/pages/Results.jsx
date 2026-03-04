@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { UserButton } from '@clerk/clerk-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import mcpClient from '../services/mcpClient';
 import '../styles/Results.css';
 
@@ -254,6 +255,12 @@ const Results = () => {
             onClick={() => setActiveTab('performance')}
           >
             📝 Performance Report
+          </button>
+          <button
+            className={`tab-button ${activeTab === 'history' ? 'active' : ''}`}
+            onClick={() => setActiveTab('history')}
+          >
+            📈 Performance History
           </button>
         </div>
 
@@ -552,6 +559,188 @@ const Results = () => {
                 )}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Performance History Tab Content */}
+        {activeTab === 'history' && (
+          <div className="history-tab-content">
+            {(() => {
+              const history = JSON.parse(localStorage.getItem('interview_history') || '[]');
+              const sortedHistory = history.slice().reverse(); // Most recent first
+
+              if (sortedHistory.length === 0) {
+                return (
+                  <div className="empty-history">
+                    <h3>📊 No Interview History Yet</h3>
+                    <p>Complete more mock interviews to track your progress over time.</p>
+                    <button className="btn-primary" onClick={() => navigate('/')}>
+                      Start New Interview
+                    </button>
+                  </div>
+                );
+              }
+
+              // Prepare chart data (chronological order for chart)
+              const chartData = history.slice().map((interview, idx) => ({
+                name: `#${idx + 1}`,
+                date: new Date(interview.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                score: interview.score,
+                fullDate: interview.date
+              }));
+
+              // Calculate stats
+              const avgScore = Math.round(sortedHistory.reduce((sum, i) => sum + i.score, 0) / sortedHistory.length);
+              const bestScore = Math.max(...sortedHistory.map(i => i.score));
+              const recentTrend = sortedHistory.length >= 2
+                ? sortedHistory[0].score - sortedHistory[1].score
+                : 0;
+
+              return (
+                <>
+                  {/* Summary Stats */}
+                  <div className="history-stats">
+                    <div className="history-stat-card">
+                      <div className="stat-icon">📊</div>
+                      <div className="stat-info">
+                        <div className="stat-value">{avgScore}/100</div>
+                        <div className="stat-label">Average Score</div>
+                      </div>
+                    </div>
+                    <div className="history-stat-card">
+                      <div className="stat-icon">🏆</div>
+                      <div className="stat-info">
+                        <div className="stat-value">{bestScore}/100</div>
+                        <div className="stat-label">Best Score</div>
+                      </div>
+                    </div>
+                    <div className="history-stat-card">
+                      <div className="stat-icon">📈</div>
+                      <div className="stat-info">
+                        <div className="stat-value" style={{ color: recentTrend >= 0 ? '#10b981' : '#ef4444' }}>
+                          {recentTrend >= 0 ? '+' : ''}{recentTrend}
+                        </div>
+                        <div className="stat-label">Recent Trend</div>
+                      </div>
+                    </div>
+                    <div className="history-stat-card">
+                      <div className="stat-icon">🎯</div>
+                      <div className="stat-info">
+                        <div className="stat-value">{sortedHistory.length}</div>
+                        <div className="stat-label">Total Interviews</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Score Trend Chart */}
+                  <div className="history-chart-section">
+                    <h3>Score Trend Over Time</h3>
+                    <p className="chart-subtitle">Track your improvement across interviews</p>
+                    <div className="history-chart-container">
+                      <ResponsiveContainer width="100%" height={300}>
+                        <AreaChart
+                          data={chartData}
+                          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                        >
+                          <defs>
+                            <linearGradient id="colorScoreHistory" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor="#4F46E5" stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                          <XAxis
+                            dataKey="date"
+                            stroke="#6B7280"
+                            style={{ fontSize: '12px' }}
+                          />
+                          <YAxis
+                            stroke="#6B7280"
+                            style={{ fontSize: '12px' }}
+                            domain={[0, 100]}
+                            ticks={[0, 25, 50, 75, 100]}
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: '#fff',
+                              border: '1px solid #E5E7EB',
+                              borderRadius: '8px',
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                            }}
+                            formatter={(value) => [`${value}/100`, 'Score']}
+                          />
+                          <Area
+                            type="monotone"
+                            dataKey="score"
+                            stroke="#4F46E5"
+                            strokeWidth={2}
+                            fillOpacity={1}
+                            fill="url(#colorScoreHistory)"
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  {/* Interview History Table */}
+                  <div className="history-table-section">
+                    <h3>Interview History</h3>
+                    <div className="history-table">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Questions</th>
+                            <th>Score</th>
+                            <th>Duration</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {sortedHistory.map((interview, idx) => (
+                            <tr key={idx}>
+                              <td>{new Date(interview.date).toLocaleDateString()}</td>
+                              <td>{interview.type}</td>
+                              <td>{interview.questionCount}</td>
+                              <td>
+                                <span className={`score-badge ${interview.score >= 70 ? 'good' : 'needs-work'}`}>
+                                  {interview.score}/100
+                                </span>
+                              </td>
+                              <td>{interview.durationFormatted || `${Math.floor(interview.duration / 60)}m`}</td>
+                              <td>
+                                <span className={`status-badge ${interview.status}`}>
+                                  {interview.status}
+                                </span>
+                              </td>
+                              <td>
+                                <button
+                                  className="btn-view-report"
+                                  onClick={() => {
+                                    navigate('/results', {
+                                      state: {
+                                        filters: interview.filters,
+                                        questions: interview.questions,
+                                        submissions: interview.submissions,
+                                        timeSpent: interview.duration
+                                      }
+                                    });
+                                  }}
+                                >
+                                  View Report
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
           </div>
         )}
       </div>

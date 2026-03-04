@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserButton } from '@clerk/clerk-react';
 import { useUser } from '@clerk/clerk-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import '../styles/Performance.css';
 
 function Performance() {
@@ -118,6 +119,63 @@ function Performance() {
             <div className="stat-label">Completion Rate</div>
           </div>
         </div>
+
+        {/* Score Trend Chart */}
+        {interviewHistory.length > 0 && (
+          <div className="chart-section">
+            <h2>Score Trend Over Time</h2>
+            <p className="chart-subtitle">Track your improvement across interviews</p>
+            <div className="chart-container">
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart
+                  data={interviewHistory.slice().reverse().map((interview, idx) => ({
+                    name: `Interview ${idx + 1}`,
+                    date: new Date(interview.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                    score: interview.score,
+                    fullDate: interview.date
+                  }))}
+                  margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#4F46E5" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                  <XAxis
+                    dataKey="date"
+                    stroke="#6B7280"
+                    style={{ fontSize: '12px' }}
+                  />
+                  <YAxis
+                    stroke="#6B7280"
+                    style={{ fontSize: '12px' }}
+                    domain={[0, 100]}
+                    ticks={[0, 25, 50, 75, 100]}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#fff',
+                      border: '1px solid #E5E7EB',
+                      borderRadius: '8px',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                    }}
+                    formatter={(value) => [`${value}/100`, 'Score']}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="score"
+                    stroke="#4F46E5"
+                    strokeWidth={2}
+                    fillOpacity={1}
+                    fill="url(#colorScore)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
 
         {/* Interview History Table */}
         <div className="history-section">

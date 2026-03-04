@@ -108,6 +108,31 @@
   letter-spacing: 0.5px;
 }
 
+/* Chart Section */
+.chart-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 3rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chart-section h2 {
+  font-size: 1.8rem;
+  color: #252424;
+  margin-bottom: 0.5rem;
+}
+
+.chart-subtitle {
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.chart-container {
+  padding: 1rem 0;
+}
+
 /* History Section */
 .history-section {
   background: #fff;

@@ -1055,8 +1055,212 @@
   background: rgba(255, 255, 255, 0.25);
 }
 
+/* Performance History Tab */
+.history-tab-content {
+  padding: 2rem 0;
+}
+
+.empty-history {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.empty-history h3 {
+  font-size: 1.5rem;
+  color: #1e293b;
+  margin-bottom: 1rem;
+}
+
+.empty-history p {
+  font-size: 1rem;
+  color: #64748b;
+  margin-bottom: 2rem;
+}
+
+/* History Stats */
+.history-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.history-stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.history-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.history-stat-card .stat-icon {
+  font-size: 2rem;
+}
+
+.history-stat-card .stat-info {
+  flex: 1;
+}
+
+.history-stat-card .stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.25rem;
+}
+
+.history-stat-card .stat-label {
+  font-size: 0.85rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* History Chart Section */
+.history-chart-section {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.history-chart-section h3 {
+  font-size: 1.5rem;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+.history-chart-section .chart-subtitle {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin-bottom: 1.5rem;
+}
+
+.history-chart-container {
+  padding: 1rem 0;
+}
+
+/* History Table Section */
+.history-table-section {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.history-table-section h3 {
+  font-size: 1.5rem;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+}
+
+.history-table {
+  overflow-x: auto;
+}
+
+.history-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.history-table th {
+  background: #f8fafc;
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #475569;
+  border-bottom: 2px solid #e2e8f0;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.history-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  color: #334155;
+}
+
+.history-table tr:hover {
+  background: #f8fafc;
+}
+
+.history-table .score-badge {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.history-table .score-badge.good {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.history-table .score-badge.needs-work {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.history-table .status-badge {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: capitalize;
+}
+
+.history-table .status-badge.completed {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.history-table .status-badge.incomplete {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.history-table .btn-view-report {
+  background: #4F46E5;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.history-table .btn-view-report:hover {
+  background: #4338ca;
+}
+
 /* Responsive */
+@media (max-width: 1024px) {
+  .history-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
+  .history-stats {
+    grid-template-columns: 1fr;
+  }
+
   .perf-score-grid {
     grid-template-columns: 1fr;
   }
@@ -1068,5 +1272,14 @@
   .perf-cta-buttons .btn-primary,
   .perf-cta-buttons .btn-secondary {
     width: 100%;
+  }
+
+  .history-table {
+    font-size: 0.85rem;
+  }
+
+  .history-table th,
+  .history-table td {
+    padding: 0.75rem 0.5rem;
   }
 }
