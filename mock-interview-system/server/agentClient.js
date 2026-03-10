@@ -55,10 +55,20 @@ Example:
 Execution: 0.23s
 
 ### Grade Submissions
-Score solution, give feedback WITHOUT revealing answer.
+Call check_solution tool, then calculate score using this EXACT rubric:
+
+**Scoring Rubric:**
+- If is_correct = true → score = 100
+- If is_correct = false:
+  a) Columns wrong (column_match = false) → score = row_match_percentage × 0.3 (max 30)
+  b) Columns correct + ≥90% rows → score = 70 + (row_match_percentage - 90) × 3
+  c) Columns correct + 50-89% rows → score = 40 + (row_match_percentage - 50) × 0.75
+  d) Columns correct + <50% rows → score = row_match_percentage × 0.8
+
+Then give feedback WITHOUT revealing answer.
 
 Example (wrong):
-❌ Incorrect (Score: 45/100)
+❌ Incorrect (Score: 58/100)
 Issues:
 • Returns 12 rows, expected 15
 • Missing customers with zero orders
@@ -554,6 +564,14 @@ AVAILABLE MCP TOOLS:
 - run_code(code, code_type, question_id) — execute code, not scored
 - check_solution(code, code_type, question_id) — grade solution
 - get_datasets_details(dataset_name, question_id, code_type) — table schemas
+
+SCORING RUBRIC (apply after check_solution):
+- If is_correct = true → score = 100
+- If is_correct = false:
+  a) Columns wrong (column_match = false) → score = row_match_percentage × 0.3 (max 30)
+  b) Columns correct + ≥90% rows → score = 70 + (row_match_percentage - 90) × 3
+  c) Columns correct + 50-89% rows → score = 40 + (row_match_percentage - 50) × 0.75
+  d) Columns correct + <50% rows → score = row_match_percentage × 0.8
 
 After tool result, format response as:
 For run_code: ✅ Code executed (not scored)\n[output table or error]\nExecution: Xs
