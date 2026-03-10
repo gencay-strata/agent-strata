@@ -22,25 +22,40 @@ const WORKFLOW_ID_REVIEW = process.env.WORKFLOW_ID_REVIEW || 'wf_698c07529600819
 function calculateScore(mcpResult) {
   const { is_correct, row_match_percentage, column_match } = mcpResult;
 
-  if (is_correct) return 100;
+  console.log('[SCORE CALC] Input:', JSON.stringify(mcpResult));
+
+  if (is_correct) {
+    console.log('[SCORE CALC] is_correct=true → returning 100');
+    return 100;
+  }
 
   const rowMatch = row_match_percentage || 0;
 
+  console.log('[SCORE CALC] column_match:', column_match, 'row_match:', rowMatch);
+
   // Columns wrong
   if (!column_match) {
-    return Math.round(rowMatch * 0.3); // max 30
+    const score = Math.round(rowMatch * 0.3);
+    console.log('[SCORE CALC] Columns wrong → score:', score);
+    return score;
   }
 
   // Columns correct
   if (rowMatch >= 90) {
-    return Math.round(70 + (rowMatch - 90) * 3);
+    const score = Math.round(70 + (rowMatch - 90) * 3);
+    console.log('[SCORE CALC] 90%+ rows → score:', score);
+    return score;
   }
 
   if (rowMatch >= 50) {
-    return Math.round(40 + (rowMatch - 50) * 0.75);
+    const score = Math.round(40 + (rowMatch - 50) * 0.75);
+    console.log('[SCORE CALC] 50-89% rows → score:', score);
+    return score;
   }
 
-  return Math.round(rowMatch * 0.8);
+  const score = Math.round(rowMatch * 0.8);
+  console.log('[SCORE CALC] <50% rows → score:', score);
+  return score;
 }
 
 // MCP Tool definition (same as Agent Builder)
