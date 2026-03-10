@@ -336,7 +336,7 @@ const Results = () => {
 
         {/* Action Buttons */}
         <div className="action-buttons">
-          <button className="btn-secondary" onClick={() => navigate('/interview')}>
+          <button className="btn-secondary" onClick={() => navigate('/interview-setup')}>
             🔄 Try Another Interview
           </button>
           <button className="btn-primary" onClick={() => window.print()}>
