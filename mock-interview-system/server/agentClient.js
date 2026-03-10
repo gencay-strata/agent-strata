@@ -723,7 +723,13 @@ async function callMcpTool(toolName, args) {
           // If check_solution, calculate score and add to result
           if (toolName === 'check_solution') {
             try {
-              const resultObj = typeof parsed.result === 'string' ? JSON.parse(parsed.result) : parsed.result;
+              let resultObj = typeof parsed.result === 'string' ? JSON.parse(parsed.result) : parsed.result;
+
+              // MCP returns {content:[{type:'text',text:'{"is_correct":true,...}'}]} - extract actual data
+              if (resultObj.content && Array.isArray(resultObj.content) && resultObj.content[0]?.text) {
+                resultObj = JSON.parse(resultObj.content[0].text);
+              }
+
               const score = calculateScore(resultObj);
               resultObj.score = score;
               return JSON.stringify(resultObj);
@@ -749,7 +755,13 @@ async function callMcpTool(toolName, args) {
   // If check_solution, calculate score and add to result
   if (toolName === 'check_solution' && data.result) {
     try {
-      const resultObj = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
+      let resultObj = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
+
+      // MCP returns {content:[{type:'text',text:'{"is_correct":true,...}'}]} - extract actual data
+      if (resultObj.content && Array.isArray(resultObj.content) && resultObj.content[0]?.text) {
+        resultObj = JSON.parse(resultObj.content[0].text);
+      }
+
       const score = calculateScore(resultObj);
       resultObj.score = score;
       return JSON.stringify(resultObj);
