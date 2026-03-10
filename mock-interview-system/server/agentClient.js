@@ -808,7 +808,14 @@ async function runGeminiAgent(systemInstruction, userMessage, forceToolCall = fa
         const { name, args } = part.functionCall;
         console.log(`🔧 MCP call: ${name}`, args);
         const output = await callMcpTool(name, args);
-        return { functionResponse: { name, response: { output } } };
+        // Parse output and pass as object (not wrapped in { output })
+        let parsedOutput;
+        try {
+          parsedOutput = JSON.parse(output);
+        } catch (e) {
+          parsedOutput = { output }; // Fallback if not JSON
+        }
+        return { functionResponse: { name, response: parsedOutput } };
       })
     );
 
