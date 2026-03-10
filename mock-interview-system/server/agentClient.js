@@ -89,9 +89,11 @@ Example:
 Execution: 0.23s
 
 ### Grade Submissions
-Call check_solution tool. The response will include a score field (0-100) already calculated by the backend.
+Call check_solution tool. The tool response contains a score field.
 
-**IMPORTANT: USE the score field from the tool response. DO NOT calculate it yourself.**
+**CRITICAL: The score is ALREADY CALCULATED. Just read response.score and use it. Example:**
+- Tool returns: {score: 40, is_correct: false} → You write: "Score: 40/100"
+- Tool returns: {score: 100, is_correct: true} → You write: "Score: 100/100"
 
 Then give feedback WITHOUT revealing answer.
 
