@@ -20,21 +20,36 @@ const WORKFLOW_ID_REVIEW = process.env.WORKFLOW_ID_REVIEW || 'wf_698c07529600819
  *   d) Columns correct + <50% rows → score = row_match_percentage × 0.8
  */
 function calculateScore(mcpResult) {
-  const { is_correct, row_match_percentage, column_match } = mcpResult;
-
   console.log('[SCORE CALC] Input:', JSON.stringify(mcpResult));
 
-  if (is_correct) {
+  if (mcpResult.is_correct) {
     console.log('[SCORE CALC] is_correct=true → returning 100');
     return 100;
   }
 
-  const rowMatch = row_match_percentage || 0;
+  // Extract user and author results
+  const userResults = mcpResult.user_results?.results;
+  const authorResults = mcpResult.author_results?.results;
 
-  console.log('[SCORE CALC] column_match:', column_match, 'row_match:', rowMatch);
+  if (!userResults || !authorResults) {
+    console.log('[SCORE CALC] Missing results data → returning 0');
+    return 0;
+  }
+
+  // Calculate column match
+  const userCols = userResults.columns || [];
+  const authorCols = authorResults.columns || [];
+  const columnMatch = JSON.stringify(userCols.sort()) === JSON.stringify(authorCols.sort());
+
+  // Calculate row match percentage
+  const userRows = userResults.data?.length || 0;
+  const authorRows = authorResults.data?.length || 0;
+  const rowMatch = authorRows > 0 ? Math.round((userRows / authorRows) * 100) : 0;
+
+  console.log('[SCORE CALC] column_match:', columnMatch, 'row_match:', rowMatch, `(${userRows}/${authorRows})`);
 
   // Columns wrong
-  if (!column_match) {
+  if (!columnMatch) {
     const score = Math.round(rowMatch * 0.3);
     console.log('[SCORE CALC] Columns wrong → score:', score);
     return score;
