@@ -605,7 +605,12 @@ For run_code:
 
   Execution: Xs
 
-For check_solution: ✅ Correct! Score: X/100  OR  ❌ Incorrect. Score: X/100\n[feedback]\n💡 Hint: [strategic hint if wrong]
+For check_solution:
+  - Read the score field from the tool response
+  - Format: ✅ Correct! Score: {score}/100  OR  ❌ Incorrect. Score: {score}/100
+  - Then add [feedback] and 💡 Hint if wrong
+
+Example: If tool returns {score: 40, is_correct: false}, write "❌ Incorrect. Score: 40/100"
 
 IMPORTANT: Always format query results as markdown tables, NEVER return raw JSON.
 
