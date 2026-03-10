@@ -9,6 +9,40 @@ import { GoogleGenAI } from "@google/genai";
 const WORKFLOW_ID = process.env.WORKFLOW_ID || 'wf_69785b59a66081908294851545870e8105ee6027e0451e3f';
 const WORKFLOW_ID_REVIEW = process.env.WORKFLOW_ID_REVIEW || 'wf_698c075296008190b107a4b83511206f0fff3039f047fa39';
 
+/**
+ * Calculate score using rubric (0-100)
+ * Rubric:
+ * - If is_correct = true → score = 100
+ * - If is_correct = false:
+ *   a) Columns wrong (column_match = false) → score = row_match_percentage × 0.3 (max 30)
+ *   b) Columns correct + ≥90% rows → score = 70 + (row_match_percentage - 90) × 3
+ *   c) Columns correct + 50-89% rows → score = 40 + (row_match_percentage - 50) × 0.75
+ *   d) Columns correct + <50% rows → score = row_match_percentage × 0.8
+ */
+function calculateScore(mcpResult) {
+  const { is_correct, row_match_percentage, column_match } = mcpResult;
+
+  if (is_correct) return 100;
+
+  const rowMatch = row_match_percentage || 0;
+
+  // Columns wrong
+  if (!column_match) {
+    return Math.round(rowMatch * 0.3); // max 30
+  }
+
+  // Columns correct
+  if (rowMatch >= 90) {
+    return Math.round(70 + (rowMatch - 90) * 3);
+  }
+
+  if (rowMatch >= 50) {
+    return Math.round(40 + (rowMatch - 50) * 0.75);
+  }
+
+  return Math.round(rowMatch * 0.8);
+}
+
 // MCP Tool definition (same as Agent Builder)
 const mcp = hostedMcpTool({
   serverLabel: "Strata_Tools",
@@ -675,7 +709,22 @@ async function callMcpTool(toolName, args) {
       try {
         const parsed = JSON.parse(raw);
         if (parsed.error) throw new Error(`MCP error: ${parsed.error.message}`);
-        if (parsed.result !== undefined) return JSON.stringify(parsed.result);
+        if (parsed.result !== undefined) {
+          // If check_solution, calculate score and add to result
+          if (toolName === 'check_solution') {
+            try {
+              const resultObj = typeof parsed.result === 'string' ? JSON.parse(parsed.result) : parsed.result;
+              const score = calculateScore(resultObj);
+              resultObj.score = score;
+              return JSON.stringify(resultObj);
+            } catch (e) {
+              console.error('Error calculating score:', e);
+              // Fallback: return original result
+              return JSON.stringify(parsed.result);
+            }
+          }
+          return JSON.stringify(parsed.result);
+        }
       } catch (e) {
         // not JSON, skip
       }
@@ -686,6 +735,21 @@ async function callMcpTool(toolName, args) {
   // Normal JSON response
   const data = await response.json();
   if (data.error) throw new Error(`MCP error: ${data.error.message}`);
+
+  // If check_solution, calculate score and add to result
+  if (toolName === 'check_solution' && data.result) {
+    try {
+      const resultObj = typeof data.result === 'string' ? JSON.parse(data.result) : data.result;
+      const score = calculateScore(resultObj);
+      resultObj.score = score;
+      return JSON.stringify(resultObj);
+    } catch (e) {
+      console.error('Error calculating score:', e);
+      // Fallback: return original result
+      return JSON.stringify(data.result);
+    }
+  }
+
   return JSON.stringify(data.result);
 }
 
