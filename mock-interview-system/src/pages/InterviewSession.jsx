@@ -492,9 +492,9 @@ const InterviewSession = () => {
 
         setChatMessages(prev => [...prev, resultMessage]);
 
-        // Extract score from agent's response (format: "Score: 58/100")
-        const scoreMatch = agentResponse.match(/Score:\s*(\d+)\/100/i);
-        const score = scoreMatch ? parseInt(scoreMatch[1], 10) : 0;
+        // Extract score from agent's response (format: "Score: 58/100" or "Score: 40.0/100")
+        const scoreMatch = agentResponse.match(/Score:\s*([\d.]+)\/100/i);
+        const score = scoreMatch ? Math.round(parseFloat(scoreMatch[1])) : 0;
         const isCorrect = score === 100;
 
         const submission = {
