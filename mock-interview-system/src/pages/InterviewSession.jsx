@@ -844,7 +844,9 @@ const InterviewSession = () => {
           <div className="code-panel">
             <div className="code-header">
               <div className="language-selector">
-                <span className="language-label">{filters.language}</span>
+                <span className="language-label">
+                  {filters.language === 'SQL' ? 'PostgreSQL' : filters.language}
+                </span>
               </div>
               <div className="code-actions">
                 <button

@@ -267,6 +267,31 @@ const Results = () => {
         {/* Overview Tab Content */}
         {activeTab === 'overview' && (
           <>
+        {/* Interviewer's Decision */}
+        <div className={`interviewer-decision ${
+          scoreOutOf10 >= 8 ? 'strong-pass' :
+          scoreOutOf10 >= 6 ? 'pass' :
+          scoreOutOf10 >= 4 ? 'borderline' : 'not-ready'
+        }`}>
+          <div className="decision-icon">
+            {scoreOutOf10 >= 8 ? '✅' : scoreOutOf10 >= 6 ? '✅' : scoreOutOf10 >= 4 ? '⚠️' : '❌'}
+          </div>
+          <div className="decision-content">
+            <h2 className="decision-title">
+              {scoreOutOf10 >= 8 ? 'Strong Pass - You\'re Interview Ready!' :
+               scoreOutOf10 >= 6 ? 'Pass - Minor Improvements Needed' :
+               scoreOutOf10 >= 4 ? 'Borderline - More Practice Required' :
+               'Not Ready Yet - Focus on Fundamentals'}
+            </h2>
+            <p className="decision-subtitle">
+              {scoreOutOf10 >= 8 ? 'Excellent work! You demonstrate strong technical skills and problem-solving ability.' :
+               scoreOutOf10 >= 6 ? 'Good performance overall. Polish a few areas and you\'ll be ready.' :
+               scoreOutOf10 >= 4 ? 'You\'re on the right track but need more practice to build confidence.' :
+               'Focus on understanding core concepts before tackling more complex problems.'}
+            </p>
+          </div>
+        </div>
+
         {/* Main Score Card */}
         <div className="score-card">
           <div className="score-circle">
@@ -307,6 +332,16 @@ const Results = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="action-buttons">
+          <button className="btn-secondary" onClick={() => navigate('/interview')}>
+            🔄 Try Another Interview
+          </button>
+          <button className="btn-primary" onClick={() => window.print()}>
+            📊 Share Results
+          </button>
         </div>
 
         {/* Score Distribution */}
@@ -420,16 +455,6 @@ const Results = () => {
               dangerouslySetInnerHTML={{ __html: formatMarkdown(reviewFeedback) }}
             />
           )}
-        </div>
-
-        {/* Action Buttons */}
-        <div className="action-buttons">
-          <button className="btn-secondary" onClick={() => navigate('/')}>
-            🔄 Try Another Interview
-          </button>
-          <button className="btn-primary" onClick={() => window.print()}>
-            📊 Share Results
-          </button>
         </div>
           </>
         )}
