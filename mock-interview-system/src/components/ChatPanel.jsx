@@ -21,18 +21,50 @@ const ChatPanel = ({ messages, isLoading }) => {
   };
 
   const formatMarkdown = (text) => {
-    // First, convert JSON tables to markdown tables
+    // First, convert dictionary/JSON tables to markdown tables
     let processed = text;
 
-    // Detect JSON-like table structures: {"columns": [...], "data": [[...]]}
+    // Detect Python dictionary format: {'col1': [...], 'col2': [...]}
+    const pythonDictRegex = /\{['"]?(\w+)['"]?\s*:\s*\[([^\]]+)\](?:\s*,\s*['"]?(\w+)['"]?\s*:\s*\[([^\]]+)\])*\}/g;
+    processed = processed.replace(pythonDictRegex, (match) => {
+      try {
+        // Extract all key-value pairs
+        const kvPairs = [];
+        const kvRegex = /['"]?(\w+)['"]?\s*:\s*\[([^\]]+)\]/g;
+        let kvMatch;
+        while ((kvMatch = kvRegex.exec(match)) !== null) {
+          const key = kvMatch[1];
+          const values = kvMatch[2].split(',').map(v => v.trim().replace(/['"]/g, ''));
+          kvPairs.push({ key, values });
+        }
+
+        if (kvPairs.length === 0) return match;
+
+        // Build markdown table
+        const columns = kvPairs.map(kv => kv.key);
+        const numRows = Math.max(...kvPairs.map(kv => kv.values.length));
+
+        let table = '| ' + columns.join(' | ') + ' |\n';
+        table += '|' + columns.map(() => '---').join('|') + '|\n';
+
+        for (let i = 0; i < numRows; i++) {
+          const row = kvPairs.map(kv => kv.values[i] || '');
+          table += '| ' + row.join(' | ') + ' |\n';
+        }
+
+        return table;
+      } catch (e) {
+        return match;
+      }
+    });
+
+    // Also handle JSON format: {"columns": [...], "data": [[...]]}
     const jsonTableRegex = /\{[^}]*"columns"\s*:\s*\[(.*?)\][^}]*"data"\s*:\s*\[([\s\S]*?)\]\s*\}/g;
     processed = processed.replace(jsonTableRegex, (match, columnsStr, dataStr) => {
       try {
-        // Parse columns
         const columns = columnsStr.match(/"([^"]+)"/g)?.map(c => c.replace(/"/g, '')) || [];
         if (columns.length === 0) return match;
 
-        // Parse data rows
         const dataRows = [];
         const rowMatches = dataStr.match(/\[([^\]]+)\]/g) || [];
         rowMatches.forEach(row => {
@@ -40,7 +72,6 @@ const ChatPanel = ({ messages, isLoading }) => {
           dataRows.push(values);
         });
 
-        // Build markdown table
         let table = '| ' + columns.join(' | ') + ' |\n';
         table += '|' + columns.map(() => '---').join('|') + '|\n';
         dataRows.forEach(row => {
@@ -49,7 +80,7 @@ const ChatPanel = ({ messages, isLoading }) => {
 
         return table;
       } catch (e) {
-        return match; // If parsing fails, return original
+        return match;
       }
     });
 
