@@ -179,3 +179,43 @@
   font-size: 0.9em;
   line-height: 1.5;
 }
+
+/* Result Tables */
+.message-text .result-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.5rem 0;
+  font-size: 0.9em;
+  background: #1e1e1e;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.message-text .result-table th,
+.message-text .result-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #333;
+}
+
+.message-text .result-table th {
+  background: #2d2d2d;
+  font-weight: 600;
+  color: #60a5fa;
+  text-transform: uppercase;
+  font-size: 0.85em;
+  letter-spacing: 0.5px;
+}
+
+.message-text .result-table td {
+  color: #e0e0e0;
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+.message-text .result-table tr:last-child td {
+  border-bottom: none;
+}
+
+.message-text .result-table tr:hover {
+  background: #252525;
+}

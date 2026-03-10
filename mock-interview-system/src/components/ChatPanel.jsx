@@ -21,7 +21,44 @@ const ChatPanel = ({ messages, isLoading }) => {
   };
 
   const formatMarkdown = (text) => {
-    return text
+    // First, convert JSON tables to markdown tables
+    let processed = text;
+
+    // Detect JSON-like table structures: {"columns": [...], "data": [[...]]}
+    const jsonTableRegex = /\{[^}]*"columns"\s*:\s*\[(.*?)\][^}]*"data"\s*:\s*\[([\s\S]*?)\]\s*\}/g;
+    processed = processed.replace(jsonTableRegex, (match, columnsStr, dataStr) => {
+      try {
+        // Parse columns
+        const columns = columnsStr.match(/"([^"]+)"/g)?.map(c => c.replace(/"/g, '')) || [];
+        if (columns.length === 0) return match;
+
+        // Parse data rows
+        const dataRows = [];
+        const rowMatches = dataStr.match(/\[([^\]]+)\]/g) || [];
+        rowMatches.forEach(row => {
+          const values = row.slice(1, -1).split(',').map(v => v.trim().replace(/"/g, ''));
+          dataRows.push(values);
+        });
+
+        // Build markdown table
+        let table = '| ' + columns.join(' | ') + ' |\n';
+        table += '|' + columns.map(() => '---').join('|') + '|\n';
+        dataRows.forEach(row => {
+          table += '| ' + row.join(' | ') + ' |\n';
+        });
+
+        return table;
+      } catch (e) {
+        return match; // If parsing fails, return original
+      }
+    });
+
+    // Now process markdown
+    return processed
+      // Markdown tables
+      .replace(/\|(.+)\|/g, (match) => {
+        return match; // Keep table rows as-is for now
+      })
       // Code blocks with backticks
       .replace(/```(\w*)\n?([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
       // Inline code
@@ -30,6 +67,26 @@ const ChatPanel = ({ messages, isLoading }) => {
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       // Italic
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      // Convert markdown tables to HTML
+      .replace(/(\|.+\|\n)+/g, (tableMatch) => {
+        const rows = tableMatch.trim().split('\n');
+        if (rows.length < 2) return tableMatch;
+
+        let html = '<table class="result-table">';
+        rows.forEach((row, idx) => {
+          if (idx === 1 && row.match(/^[\|\-\s]+$/)) return; // Skip separator row
+
+          const cells = row.split('|').filter(c => c.trim());
+          const tag = idx === 0 ? 'th' : 'td';
+          html += '<tr>';
+          cells.forEach(cell => {
+            html += `<${tag}>${cell.trim()}</${tag}>`;
+          });
+          html += '</tr>';
+        });
+        html += '</table>';
+        return html;
+      })
       // Line breaks
       .replace(/\n/g, '<br/>');
   };
