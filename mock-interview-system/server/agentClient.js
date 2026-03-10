@@ -89,15 +89,9 @@ Example:
 Execution: 0.23s
 
 ### Grade Submissions
-Call check_solution tool, then calculate score using this EXACT rubric:
+Call check_solution tool. The response will include a score field (0-100) already calculated by the backend.
 
-**Scoring Rubric:**
-- If is_correct = true → score = 100
-- If is_correct = false:
-  a) Columns wrong (column_match = false) → score = row_match_percentage × 0.3 (max 30)
-  b) Columns correct + ≥90% rows → score = 70 + (row_match_percentage - 90) × 3
-  c) Columns correct + 50-89% rows → score = 40 + (row_match_percentage - 50) × 0.75
-  d) Columns correct + <50% rows → score = row_match_percentage × 0.8
+**IMPORTANT: USE the score field from the tool response. DO NOT calculate it yourself.**
 
 Then give feedback WITHOUT revealing answer.
 
@@ -599,13 +593,7 @@ AVAILABLE MCP TOOLS:
 - check_solution(code, code_type, question_id) — grade solution
 - get_datasets_details(dataset_name, question_id, code_type) — table schemas
 
-SCORING RUBRIC (apply after check_solution):
-- If is_correct = true → score = 100
-- If is_correct = false:
-  a) Columns wrong (column_match = false) → score = row_match_percentage × 0.3 (max 30)
-  b) Columns correct + ≥90% rows → score = 70 + (row_match_percentage - 90) × 3
-  c) Columns correct + 50-89% rows → score = 40 + (row_match_percentage - 50) × 0.75
-  d) Columns correct + <50% rows → score = row_match_percentage × 0.8
+IMPORTANT: The check_solution tool response includes a pre-calculated score field (0-100). USE this score directly. DO NOT calculate it yourself.
 
 After tool result, format response as:
 For run_code:
