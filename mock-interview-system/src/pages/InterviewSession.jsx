@@ -492,16 +492,15 @@ const InterviewSession = () => {
 
         setChatMessages(prev => [...prev, resultMessage]);
 
-        // Try to determine if solution was correct from agent's response
-        const isCorrect = agentResponse.includes('✅') &&
-                         (agentResponse.includes('Perfect') ||
-                          agentResponse.includes('Correct') ||
-                          agentResponse.includes('100/100'));
+        // Extract score from agent's response (format: "Score: 58/100")
+        const scoreMatch = agentResponse.match(/Score:\s*(\d+)\/100/i);
+        const score = scoreMatch ? parseInt(scoreMatch[1], 10) : 0;
+        const isCorrect = score === 100;
 
         const submission = {
           questionId: questions[currentQuestionIndex].id,
           code,
-          result: { feedback: agentResponse, correct: isCorrect },
+          result: { feedback: agentResponse, correct: isCorrect, score },
           timestamp: new Date()
         };
 
