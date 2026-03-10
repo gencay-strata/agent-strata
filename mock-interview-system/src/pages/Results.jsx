@@ -180,13 +180,14 @@ const Results = () => {
     return null;
   }
 
-  // Calculate overall score (use questions.length as the denominator to avoid >100%)
+  // Calculate overall score using actual scores (0-100 per question)
   const totalScore = submissions.reduce((sum, sub) => {
-    return sum + (sub.result?.correct ? 1 : 0);
+    return sum + (sub.result?.score || 0);
   }, 0);
   const maxQuestions = Math.max(questions.length, submissions.length);
-  const scorePercentage = Math.min(100, Math.round((totalScore / maxQuestions) * 100));
-  const scoreOutOf10 = Math.min(10, (totalScore / maxQuestions) * 10).toFixed(1);
+  const averageScore = totalScore / maxQuestions; // 0-100 range
+  const scorePercentage = Math.min(100, Math.round(averageScore));
+  const scoreOutOf10 = Math.min(10, (averageScore / 10)).toFixed(1);
 
   // Calculate percentile (mock data)
   const percentile = scorePercentage >= 90 ? 87 : scorePercentage >= 70 ? 73 : scorePercentage >= 50 ? 55 : 35;
