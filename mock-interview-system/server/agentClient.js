@@ -45,7 +45,7 @@ const myAgent = new Agent({
 ## Your Job
 
 ### Test Code
-Execute, format results as tables, show errors clearly.
+Execute, format results as **markdown tables**, show errors clearly. NEVER return raw JSON.
 
 Example:
 ✅ Code executed (not scored)
@@ -574,8 +574,18 @@ SCORING RUBRIC (apply after check_solution):
   d) Columns correct + <50% rows → score = row_match_percentage × 0.8
 
 After tool result, format response as:
-For run_code: ✅ Code executed (not scored)\n[output table or error]\nExecution: Xs
+For run_code:
+  ✅ Code executed (not scored)
+
+  | column1 | column2 |
+  |---------|---------|
+  | value1  | value2  |
+
+  Execution: Xs
+
 For check_solution: ✅ Correct! Score: X/100  OR  ❌ Incorrect. Score: X/100\n[feedback]\n💡 Hint: [strategic hint if wrong]
+
+IMPORTANT: Always format query results as markdown tables, NEVER return raw JSON.
 
 Rules:
 - NEVER reveal solutions or write code for the user
