@@ -58,7 +58,37 @@ const ChatPanel = ({ messages, isLoading }) => {
       }
     });
 
-    // Also handle JSON format: {"columns": [...], "data": [[...]]}
+    // Handle nested JSON format: {"results": {"index": [...], "columns": [...], "data": [...]}}
+    const nestedJsonRegex = /\{[^{}]*"results"\s*:\s*\{[^}]*"(?:index|columns)"\s*:[^}]*\}[^}]*\}/g;
+    processed = processed.replace(nestedJsonRegex, (match) => {
+      try {
+        // Clean and parse JSON (handle both single and double quotes)
+        const cleaned = match.replace(/'/g, '"');
+        const parsed = JSON.parse(cleaned);
+
+        if (!parsed.results || !parsed.results.columns) return match;
+
+        const columns = parsed.results.columns;
+        const data = parsed.results.data || [];
+
+        // Build table
+        let table = '| ' + columns.join(' | ') + ' |\n';
+        table += '|' + columns.map(() => '---').join('|') + '|\n';
+
+        // If data is array of arrays
+        if (Array.isArray(data) && data.length > 0 && Array.isArray(data[0])) {
+          data.forEach(row => {
+            table += '| ' + row.join(' | ') + ' |\n';
+          });
+        }
+
+        return table;
+      } catch (e) {
+        return match;
+      }
+    });
+
+    // Handle simple JSON format: {"columns": [...], "data": [[...]]}
     const jsonTableRegex = /\{[^}]*"columns"\s*:\s*\[(.*?)\][^}]*"data"\s*:\s*\[([\s\S]*?)\]\s*\}/g;
     processed = processed.replace(jsonTableRegex, (match, columnsStr, dataStr) => {
       try {
