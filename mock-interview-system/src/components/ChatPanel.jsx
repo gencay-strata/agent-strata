@@ -21,102 +21,116 @@ const ChatPanel = ({ messages, isLoading }) => {
   };
 
   const formatMarkdown = (text) => {
-    // First, convert dictionary/JSON tables to markdown tables
     let processed = text;
 
-    // Detect Python dictionary format: {'col1': [...], 'col2': [...]}
-    const pythonDictRegex = /\{['"]?(\w+)['"]?\s*:\s*\[([^\]]+)\](?:\s*,\s*['"]?(\w+)['"]?\s*:\s*\[([^\]]+)\])*\}/g;
-    processed = processed.replace(pythonDictRegex, (match) => {
-      try {
-        // Extract all key-value pairs
-        const kvPairs = [];
-        const kvRegex = /['"]?(\w+)['"]?\s*:\s*\[([^\]]+)\]/g;
-        let kvMatch;
-        while ((kvMatch = kvRegex.exec(match)) !== null) {
-          const key = kvMatch[1];
-          const values = kvMatch[2].split(',').map(v => v.trim().replace(/['"]/g, ''));
-          kvPairs.push({ key, values });
+    // Helper function to convert JSON to markdown table
+    const convertJsonToTable = (content) => {
+      let converted = content;
+
+      // Python dict format: {'col1': [...], 'col2': [...]}
+      const pythonDictRegex = /\{['"]?(\w+)['"]?\s*:\s*\[([^\]]+)\](?:\s*,\s*['"]?(\w+)['"]?\s*:\s*\[([^\]]+)\])*\}/g;
+      converted = converted.replace(pythonDictRegex, (match) => {
+        try {
+          const kvPairs = [];
+          const kvRegex = /['"]?(\w+)['"]?\s*:\s*\[([^\]]+)\]/g;
+          let kvMatch;
+          while ((kvMatch = kvRegex.exec(match)) !== null) {
+            const key = kvMatch[1];
+            const values = kvMatch[2].split(',').map(v => v.trim().replace(/['"]/g, ''));
+            kvPairs.push({ key, values });
+          }
+
+          if (kvPairs.length === 0) return match;
+
+          const columns = kvPairs.map(kv => kv.key);
+          const numRows = Math.max(...kvPairs.map(kv => kv.values.length));
+
+          let table = '| ' + columns.join(' | ') + ' |\n';
+          table += '|' + columns.map(() => '---').join('|') + '|\n';
+
+          for (let i = 0; i < numRows; i++) {
+            const row = kvPairs.map(kv => kv.values[i] || '');
+            table += '| ' + row.join(' | ') + ' |\n';
+          }
+
+          return table;
+        } catch (e) {
+          return match;
         }
+      });
 
-        if (kvPairs.length === 0) return match;
+      // Nested JSON: {"results": {"index": [...], "columns": [...], "data": [...]}}
+      const nestedJsonRegex = /\{[^{}]*"results"\s*:\s*\{[^}]*"(?:index|columns)"\s*:[^}]*\}[^}]*\}/g;
+      converted = converted.replace(nestedJsonRegex, (match) => {
+        try {
+          const cleaned = match.replace(/'/g, '"');
+          const parsed = JSON.parse(cleaned);
 
-        // Build markdown table
-        const columns = kvPairs.map(kv => kv.key);
-        const numRows = Math.max(...kvPairs.map(kv => kv.values.length));
+          if (!parsed.results || !parsed.results.columns) return match;
 
-        let table = '| ' + columns.join(' | ') + ' |\n';
-        table += '|' + columns.map(() => '---').join('|') + '|\n';
+          const columns = parsed.results.columns;
+          const data = parsed.results.data || [];
 
-        for (let i = 0; i < numRows; i++) {
-          const row = kvPairs.map(kv => kv.values[i] || '');
-          table += '| ' + row.join(' | ') + ' |\n';
+          let table = '| ' + columns.join(' | ') + ' |\n';
+          table += '|' + columns.map(() => '---').join('|') + '|\n';
+
+          if (Array.isArray(data) && data.length > 0 && Array.isArray(data[0])) {
+            data.forEach(row => {
+              table += '| ' + row.join(' | ') + ' |\n';
+            });
+          }
+
+          return table;
+        } catch (e) {
+          return match;
         }
+      });
 
-        return table;
-      } catch (e) {
-        return match;
-      }
-    });
+      // Simple JSON: {"columns": [...], "data": [[...]]}
+      const jsonTableRegex = /\{[^}]*"columns"\s*:\s*\[(.*?)\][^}]*"data"\s*:\s*\[([\s\S]*?)\]\s*\}/g;
+      converted = converted.replace(jsonTableRegex, (match, columnsStr, dataStr) => {
+        try {
+          const columns = columnsStr.match(/"([^"]+)"/g)?.map(c => c.replace(/"/g, '')) || [];
+          if (columns.length === 0) return match;
 
-    // Handle nested JSON format: {"results": {"index": [...], "columns": [...], "data": [...]}}
-    const nestedJsonRegex = /\{[^{}]*"results"\s*:\s*\{[^}]*"(?:index|columns)"\s*:[^}]*\}[^}]*\}/g;
-    processed = processed.replace(nestedJsonRegex, (match) => {
-      try {
-        // Clean and parse JSON (handle both single and double quotes)
-        const cleaned = match.replace(/'/g, '"');
-        const parsed = JSON.parse(cleaned);
+          const dataRows = [];
+          const rowMatches = dataStr.match(/\[([^\]]+)\]/g) || [];
+          rowMatches.forEach(row => {
+            const values = row.slice(1, -1).split(',').map(v => v.trim().replace(/"/g, ''));
+            dataRows.push(values);
+          });
 
-        if (!parsed.results || !parsed.results.columns) return match;
-
-        const columns = parsed.results.columns;
-        const data = parsed.results.data || [];
-
-        // Build table
-        let table = '| ' + columns.join(' | ') + ' |\n';
-        table += '|' + columns.map(() => '---').join('|') + '|\n';
-
-        // If data is array of arrays
-        if (Array.isArray(data) && data.length > 0 && Array.isArray(data[0])) {
-          data.forEach(row => {
+          let table = '| ' + columns.join(' | ') + ' |\n';
+          table += '|' + columns.map(() => '---').join('|') + '|\n';
+          dataRows.forEach(row => {
             table += '| ' + row.join(' | ') + ' |\n';
           });
+
+          return table;
+        } catch (e) {
+          return match;
         }
+      });
 
-        return table;
-      } catch (e) {
-        return match;
+      return converted;
+    };
+
+    // Step 1: Convert JSON inside code blocks first
+    processed = processed.replace(/```(?:json|python|sql)?\n?([\s\S]*?)```/g, (match, code) => {
+      const converted = convertJsonToTable(code);
+      // If conversion created a table, return it without code block
+      if (converted.includes('|') && converted !== code) {
+        return converted;
       }
+      // Otherwise keep as code block
+      return match;
     });
 
-    // Handle simple JSON format: {"columns": [...], "data": [[...]]}
-    const jsonTableRegex = /\{[^}]*"columns"\s*:\s*\[(.*?)\][^}]*"data"\s*:\s*\[([\s\S]*?)\]\s*\}/g;
-    processed = processed.replace(jsonTableRegex, (match, columnsStr, dataStr) => {
-      try {
-        const columns = columnsStr.match(/"([^"]+)"/g)?.map(c => c.replace(/"/g, '')) || [];
-        if (columns.length === 0) return match;
+    // Step 2: Convert JSON in normal text
+    processed = convertJsonToTable(processed);
 
-        const dataRows = [];
-        const rowMatches = dataStr.match(/\[([^\]]+)\]/g) || [];
-        rowMatches.forEach(row => {
-          const values = row.slice(1, -1).split(',').map(v => v.trim().replace(/"/g, ''));
-          dataRows.push(values);
-        });
-
-        let table = '| ' + columns.join(' | ') + ' |\n';
-        table += '|' + columns.map(() => '---').join('|') + '|\n';
-        dataRows.forEach(row => {
-          table += '| ' + row.join(' | ') + ' |\n';
-        });
-
-        return table;
-      } catch (e) {
-        return match;
-      }
-    });
-
-    // Now process markdown
+    // Step 3: Process markdown formatting
     return processed
-      // Markdown tables
       .replace(/\|(.+)\|/g, (match) => {
         return match; // Keep table rows as-is for now
       })
