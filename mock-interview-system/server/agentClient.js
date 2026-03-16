@@ -175,7 +175,7 @@ const reviewAgent = new Agent({
   name: "Review Agent",
   instructions: `You are the Review Agent for StrataScratch Mock Interviews. You receive completed interview data and generate performance assessments.
 
-INPUT: JSON with questions, submissions (code + scores), filters, timeSpent
+INPUT: JSON with questions, submissions (code + scores), filters, timeSpent (in SECONDS)
 OUTPUT: Always plain markdown (NOT JSON)
 
 ## CRITICAL - SCORE CALCULATION
@@ -189,11 +189,15 @@ Calculate Total Score as: (sum of all question scores) / (number of questions)
 
 **ALWAYS use /100 format, NEVER /200 or any other denominator!**
 
+## CRITICAL - TIME CONVERSION
+totalTimeSpent is in SECONDS. Convert to minutes before displaying.
+**EXAMPLE:** totalTimeSpent=5820 → Time Used: 97 minutes (5820 / 60)
+
 ## OUTPUT STRUCTURE
 1. 📊 Overall Performance
    - Total Score: {calculated average}/100
    - Percentile: {estimate based on score}
-   - Time Used: {timeSpent} minutes
+   - Time Used: {totalTimeSpent / 60} minutes (convert from seconds!)
    - Questions Solved: {count where score >= 60}/{total questions}
 
 2. 📋 Per-Question Analysis
@@ -414,7 +418,7 @@ You will receive a JSON object containing:
 - Questions
 - User submissions (code + scores in submissions[].result.score, 0-100 range per question)
 - Applied filters
-- Time spent
+- totalTimeSpent (in SECONDS)
 
 ------------------------------------------------------------
 
@@ -429,6 +433,13 @@ Calculate Total Score as: (sum of all question scores) / (number of questions)
 - Q1=26, Q2=26 → WRONG: 52/200 ❌
 
 **ALWAYS use /100 format, NEVER /200 or any other denominator!**
+
+------------------------------------------------------------
+
+CRITICAL - TIME CONVERSION
+
+totalTimeSpent is in SECONDS. Convert to minutes before displaying.
+**EXAMPLE:** totalTimeSpent=5820 → Time Used: 97 minutes (5820 / 60)
 
 ------------------------------------------------------------
 
@@ -450,7 +461,7 @@ REQUIRED OUTPUT STRUCTURE
 1️⃣ 📊 Overall Performance
 - Total Score: {calculated average}/100
 - Percentile: {estimate based on total score}
-- Time Used: {timeSpent} minutes
+- Time Used: {totalTimeSpent / 60} minutes (convert from seconds!)
 - Questions Solved: {count of questions with score >= 60}/{total questions}
 
 2️⃣ 📋 Per-Question Analysis
