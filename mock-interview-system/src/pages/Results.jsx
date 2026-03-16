@@ -199,10 +199,13 @@ const Results = () => {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Category scores (mock data based on performance)
-  const technicalSkill = Math.min(10, Math.round(scoreOutOf10 * 1.1));
-  const codeQuality = Math.min(10, Math.round(scoreOutOf10 * 0.95));
-  const communication = Math.min(10, Math.round(scoreOutOf10 * 0.9));
+  // Category scores (calculated from real data)
+  const technicalSkill = Math.min(10, Math.round(scoreOutOf10)); // Based on actual scores
+  const timeUsagePercent = (timeSpent / (filters.duration * 60)) * 100;
+  const timeManagement = timeUsagePercent < 60 ? 9 :  // Fast completion
+                         timeUsagePercent < 85 ? 7 :  // Good time usage
+                         timeUsagePercent < 100 ? 5 : // Close to limit
+                         3; // Time ran out
 
   return (
     <div className="results-container">
@@ -381,30 +384,17 @@ const Results = () => {
               <span className="category-score">{technicalSkill}<span className="score-max">/10</span></span>
             </div>
             <div className="category-stats">
-              <span className="stat-item">↗ +{Math.round(Math.random() * 20)}% vs. previous</span>
-              <span className="stat-item">👥 +{Math.round(Math.random() * 50)}% vs. others</span>
+              <span className="stat-item">📊 Based on solution correctness</span>
             </div>
           </div>
 
           <div className="category-card quality">
             <div className="category-header">
-              <span className="category-name">Code Quality</span>
-              <span className="category-score">{codeQuality}<span className="score-max">/10</span></span>
+              <span className="category-name">Time Management</span>
+              <span className="category-score">{timeManagement}<span className="score-max">/10</span></span>
             </div>
             <div className="category-stats">
-              <span className="stat-item">↗ +{Math.round(Math.random() * 20)}% vs. previous</span>
-              <span className="stat-item">👥 +{Math.round(Math.random() * 50)}% vs. others</span>
-            </div>
-          </div>
-
-          <div className="category-card communication">
-            <div className="category-header">
-              <span className="category-name">Communication</span>
-              <span className="category-score">{communication}<span className="score-max">/10</span></span>
-            </div>
-            <div className="category-stats">
-              <span className="stat-item">↗ +{Math.round(Math.random() * 20)}% vs. previous</span>
-              <span className="stat-item">👥 +{Math.round(Math.random() * 50)}% vs. others</span>
+              <span className="stat-item">⏱️ Used {Math.round(timeUsagePercent)}% of allocated time</span>
             </div>
           </div>
         </div>
