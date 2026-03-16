@@ -178,9 +178,30 @@ const reviewAgent = new Agent({
 INPUT: JSON with questions, submissions (code + scores), filters, timeSpent
 OUTPUT: Always plain markdown (NOT JSON)
 
+## CRITICAL - SCORE CALCULATION
+Each question has a score in submissions[].result.score (0-100 range).
+Calculate Total Score as: (sum of all question scores) / (number of questions)
+
+**EXAMPLES:**
+- Q1=26, Q2=26 → Total Score = (26+26)/2 = 26/100 ✅
+- Q1=100, Q2=40 → Total Score = (100+40)/2 = 70/100 ✅
+- Q1=26, Q2=26 → WRONG: 52/200 ❌
+
+**ALWAYS use /100 format, NEVER /200 or any other denominator!**
+
 ## OUTPUT STRUCTURE
-1. 📊 Overall Score (X/100, percentile, time used, questions solved)
-2. 📋 Per-Question Analysis (what was good, what to improve, better code example)
+1. 📊 Overall Performance
+   - Total Score: {calculated average}/100
+   - Percentile: {estimate based on score}
+   - Time Used: {timeSpent} minutes
+   - Questions Solved: {count where score >= 60}/{total questions}
+
+2. 📋 Per-Question Analysis
+   - For each question, reference actual code
+   - ✅ What was done well
+   - ❌ What needs improvement
+   - 💡 Improved code example
+
 3. 🎯 Strengths & Weaknesses table (Technical Skill, Code Quality, Problem Solving, Time Management — star ratings)
 4. 🔑 Key Patterns (2-3 patterns across all questions)
 5. 📚 Practice Plan (weak topics + recommended question IDs)
@@ -391,9 +412,23 @@ INPUT
 
 You will receive a JSON object containing:
 - Questions
-- User submissions (code + scores)
+- User submissions (code + scores in submissions[].result.score, 0-100 range per question)
 - Applied filters
 - Time spent
+
+------------------------------------------------------------
+
+CRITICAL - SCORE CALCULATION
+
+Each question has a score in submissions[].result.score (0-100 range).
+Calculate Total Score as: (sum of all question scores) / (number of questions)
+
+**EXAMPLES:**
+- Q1=26, Q2=26 → Total Score = (26+26)/2 = 26/100 ✅
+- Q1=100, Q2=40 → Total Score = (100+40)/2 = 70/100 ✅
+- Q1=26, Q2=26 → WRONG: 52/200 ❌
+
+**ALWAYS use /100 format, NEVER /200 or any other denominator!**
 
 ------------------------------------------------------------
 
@@ -413,10 +448,10 @@ OUTPUT REQUIREMENTS
 REQUIRED OUTPUT STRUCTURE
 
 1️⃣ 📊 Overall Performance
-- Total Score (X/100)
-- Percentile
-- Time Used
-- Questions Solved
+- Total Score: {calculated average}/100
+- Percentile: {estimate based on total score}
+- Time Used: {timeSpent} minutes
+- Questions Solved: {count of questions with score >= 60}/{total questions}
 
 2️⃣ 📋 Per-Question Analysis
 

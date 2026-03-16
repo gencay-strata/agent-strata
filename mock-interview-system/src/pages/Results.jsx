@@ -275,14 +275,14 @@ const Results = () => {
           scoreOutOf10 >= 4 ? 'borderline' : 'not-ready'
         }`}>
           <div className="decision-icon">
-            {scoreOutOf10 >= 8 ? '✅' : scoreOutOf10 >= 6 ? '✅' : scoreOutOf10 >= 4 ? '⚠️' : '❌'}
+            {scoreOutOf10 >= 8 ? '✅' : scoreOutOf10 >= 6 ? '✅' : scoreOutOf10 >= 4 ? '⚠️' : '📚'}
           </div>
           <div className="decision-content">
             <h2 className="decision-title">
-              {scoreOutOf10 >= 8 ? 'Strong Pass - You\'re Interview Ready!' :
-               scoreOutOf10 >= 6 ? 'Pass - Minor Improvements Needed' :
-               scoreOutOf10 >= 4 ? 'Borderline - More Practice Required' :
-               'Not Ready Yet - Focus on Fundamentals'}
+              {scoreOutOf10 >= 8 ? '✅ Strong Pass - You\'re interview ready!' :
+               scoreOutOf10 >= 6 ? '✅ Pass - Just a few things to polish.' :
+               scoreOutOf10 >= 4 ? '⚠️ Getting Close - A bit more practice will get you there.' :
+               '📚 Keep Practicing - Review the basics and give it another go.'}
             </h2>
             <p className="decision-subtitle">
               {scoreOutOf10 >= 8 ? 'Excellent work! You demonstrate strong technical skills and problem-solving ability.' :
@@ -414,21 +414,22 @@ const Results = () => {
           <h3>Question Summary</h3>
           {submissions.map((submission, idx) => {
             const question = questions[idx] || {};
+            const questionScore = submission.result?.score || 0; // 0-100 range
+            const scoreOutOf10 = (questionScore / 10).toFixed(1); // Convert to /10
             return (
-              <div key={idx} className={`question-item ${submission.result?.correct ? 'correct' : 'incorrect'}`}>
+              <div key={idx} className={`question-item ${questionScore >= 60 ? 'correct' : 'incorrect'}`}>
                 <div className="question-number">Q{idx + 1}</div>
                 <div className="question-details">
                   <div className="question-title-row">
                     <span className="question-title">{question.title || question.question_short || 'Question'}</span>
                     <span className="question-score">
-                      {submission.result?.correct ? '9' : Math.floor(Math.random() * 5 + 3)}<span className="score-max">/10</span>
+                      {scoreOutOf10}<span className="score-max">/10</span>
                     </span>
                   </div>
                   <div className="question-meta">
                     <span className={`difficulty-badge ${question.difficulty === '2' ? 'medium' : question.difficulty === '1' ? 'easy' : 'hard'}`}>
                       {question.difficulty === '2' ? 'Medium' : question.difficulty === '1' ? 'Easy' : 'Hard'}
                     </span>
-                    <span className="test-cases">Test Cases: {submission.result?.correct ? '5/5' : '3/5'}</span>
                   </div>
                 </div>
               </div>
