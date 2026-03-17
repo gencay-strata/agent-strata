@@ -320,7 +320,6 @@ const Results = () => {
           </div>
           <div className="score-details">
             <div className="percentile-badge">
-              <span className="percentile-number">{scorePercentage}%</span>
               <span className="percentile-text">Beats {percentile}% of all users</span>
               <span className="rank-badge">🏆 Almost There</span>
             </div>
