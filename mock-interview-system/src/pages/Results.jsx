@@ -347,6 +347,67 @@ const Results = () => {
           </button>
         </div>
 
+        {/* Logic & Output Breakdown */}
+        <div className="score-breakdown-section">
+          <h3>Score Breakdown</h3>
+
+          {/* Logic Summary */}
+          <div className="breakdown-card logic">
+            <div className="breakdown-header">
+              <span className="breakdown-icon">💡</span>
+              <div className="breakdown-title">
+                <h4>Logic Score (75% weight)</h4>
+                <div className="breakdown-score">
+                  {(() => {
+                    const logicScores = submissions.map(s => s.result?.logicScore || 0);
+                    const avgLogic = logicScores.reduce((sum, score) => sum + score, 0) / logicScores.length;
+                    return (avgLogic / 10).toFixed(1);
+                  })()}<span className="score-max">/10</span>
+                </div>
+              </div>
+            </div>
+            <div className="breakdown-summary">
+              <p>
+                {(() => {
+                  const logicScores = submissions.map(s => s.result?.logicScore || 0);
+                  const avgLogic = logicScores.reduce((sum, score) => sum + score, 0) / logicScores.length;
+                  if (avgLogic >= 80) return "Excellent problem-solving approach and code structure. Your logic demonstrates strong understanding of core concepts.";
+                  if (avgLogic >= 60) return "Good logic overall. Some areas could be optimized for better efficiency and readability.";
+                  return "Logic needs improvement. Focus on understanding the problem requirements and structuring your approach before coding.";
+                })()}
+              </p>
+            </div>
+          </div>
+
+          {/* Output Summary */}
+          <div className="breakdown-card output">
+            <div className="breakdown-header">
+              <span className="breakdown-icon">✅</span>
+              <div className="breakdown-title">
+                <h4>Output Score (25% weight)</h4>
+                <div className="breakdown-score">
+                  {(() => {
+                    const outputScores = submissions.map(s => s.result?.outputScore || 0);
+                    const avgOutput = outputScores.reduce((sum, score) => sum + score, 0) / outputScores.length;
+                    return (avgOutput / 10).toFixed(1);
+                  })()}<span className="score-max">/10</span>
+                </div>
+              </div>
+            </div>
+            <div className="breakdown-summary">
+              <p>
+                {(() => {
+                  const outputScores = submissions.map(s => s.result?.outputScore || 0);
+                  const avgOutput = outputScores.reduce((sum, score) => sum + score, 0) / outputScores.length;
+                  if (avgOutput >= 80) return "Your solutions produce correct outputs. Great attention to detail and accuracy.";
+                  if (avgOutput >= 60) return "Most outputs are correct. Double-check edge cases and result formatting.";
+                  return "Output accuracy needs work. Verify your results match expected format and handle all test cases.";
+                })()}
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Score Distribution */}
         <div className="distribution-card">
           <h3>Score Distribution</h3>
@@ -403,10 +464,15 @@ const Results = () => {
           <h3>Question Summary</h3>
           {submissions.map((submission, idx) => {
             const question = questions[idx] || {};
-            const questionScore = submission.result?.score || 0; // 0-100 range
-            const scoreOutOf10 = (questionScore / 10).toFixed(1); // Convert to /10
+            const finalScore = submission.result?.finalScore || submission.result?.score || 0;
+            const logicScore = submission.result?.logicScore || 0;
+            const outputScore = submission.result?.outputScore || 0;
+            const logicExplanation = submission.result?.logicExplanation || '';
+            const outputExplanation = submission.result?.outputExplanation || '';
+            const scoreOutOf10 = (finalScore / 10).toFixed(1);
+
             return (
-              <div key={idx} className={`question-item ${questionScore >= 60 ? 'correct' : 'incorrect'}`}>
+              <div key={idx} className={`question-item ${finalScore >= 60 ? 'correct' : 'incorrect'}`}>
                 <div className="question-number">Q{idx + 1}</div>
                 <div className="question-details">
                   <div className="question-title-row">
@@ -420,6 +486,32 @@ const Results = () => {
                       {question.difficulty === '2' ? 'Medium' : question.difficulty === '1' ? 'Easy' : 'Hard'}
                     </span>
                   </div>
+
+                  {/* Score Breakdown */}
+                  <div className="question-breakdown">
+                    <div className="breakdown-item">
+                      <span className="breakdown-label">💡 Logic (75%):</span>
+                      <span className="breakdown-value">{(logicScore / 10).toFixed(1)}/10</span>
+                    </div>
+                    <div className="breakdown-item">
+                      <span className="breakdown-label">✅ Output (25%):</span>
+                      <span className="breakdown-value">{(outputScore / 10).toFixed(1)}/10</span>
+                    </div>
+                  </div>
+
+                  {/* Explanations */}
+                  {logicExplanation && (
+                    <div className="question-explanation logic">
+                      <strong>Logic Feedback:</strong>
+                      <p>{logicExplanation}</p>
+                    </div>
+                  )}
+                  {outputExplanation && (
+                    <div className="question-explanation output">
+                      <strong>Output:</strong>
+                      <p>{outputExplanation}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             );

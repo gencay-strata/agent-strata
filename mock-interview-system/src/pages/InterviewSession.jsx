@@ -492,15 +492,40 @@ const InterviewSession = () => {
 
         setChatMessages(prev => [...prev, resultMessage]);
 
-        // Extract score from agent's response (format: "Score: 58/100" or "Score: 40.0/100")
-        const scoreMatch = agentResponse.match(/Score:\s*([\d.]+)\/100/i);
-        const score = scoreMatch ? Math.round(parseFloat(scoreMatch[1])) : 0;
-        const isCorrect = score === 100;
+        // Extract NEW scores from agent's response (75% logic + 25% output = final)
+        const finalScoreMatch = agentResponse.match(/Final Score:\s*([\d.]+)\/100/i);
+        const logicScoreMatch = agentResponse.match(/Logic Score:\s*([\d.]+)\/100/i);
+        const outputScoreMatch = agentResponse.match(/Output Score:\s*([\d.]+)\/100/i);
+
+        const finalScore = finalScoreMatch ? Math.round(parseFloat(finalScoreMatch[1])) : 0;
+        const logicScore = logicScoreMatch ? Math.round(parseFloat(logicScoreMatch[1])) : 0;
+        const outputScore = outputScoreMatch ? Math.round(parseFloat(outputScoreMatch[1])) : 0;
+        const isCorrect = finalScore >= 90; // Consider 90+ as "correct"
+
+        // Extract explanations
+        const logicExplanation = (() => {
+          const match = agentResponse.match(/Logic Score:.*?\n([\s\S]*?)(?=\n\*\*|$)/);
+          return match ? match[1].trim() : '';
+        })();
+
+        const outputExplanation = (() => {
+          const match = agentResponse.match(/Output Score:.*?\n([\s\S]*?)(?=\n---|$)/);
+          return match ? match[1].trim() : '';
+        })();
 
         const submission = {
           questionId: questions[currentQuestionIndex].id,
           code,
-          result: { feedback: agentResponse, correct: isCorrect, score },
+          result: {
+            feedback: agentResponse,
+            correct: isCorrect,
+            score: finalScore, // Legacy field (for backwards compatibility)
+            finalScore,
+            logicScore,
+            outputScore,
+            logicExplanation,
+            outputExplanation
+          },
           timestamp: new Date()
         };
 
