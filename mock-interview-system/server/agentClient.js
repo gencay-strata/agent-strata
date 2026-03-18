@@ -146,6 +146,9 @@ Assign logic_score (0-100):
 **Step 3: Calculate FINAL score**
 final_score = (logic_score × 0.75) + (output_score × 0.25)
 
+**MATH RULES:** Use precise arithmetic - multiply first, then add.
+Example: Logic=70, Output=40 → (70×0.75)=52.5, (40×0.25)=10, 52.5+10=62.5 (NOT 55!)
+
 **Step 4: Return structured response**
 
 Format:
