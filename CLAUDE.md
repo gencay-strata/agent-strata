@@ -1,4 +1,4 @@
-# StrataScratch Mock Interview System
+# StrataScratch Mock Interview System - AI-Powered Technical Assessment Platform
 
 ## Tech Stack
 - **Frontend**: React + Vite
