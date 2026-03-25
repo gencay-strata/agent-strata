@@ -8,7 +8,10 @@
 - **Active Provider**: Vertex AI (`AGENT_PROVIDER=vertex` in server/.env)
 - **MCP**: StrataScratch API (`https://api.stratascratch.com/mcp`) - JSON-RPC 2.0
 - **Data**: Local CSV, 413k+ questions
-- **Hosting**: Vercel | **Repo**: https://github.com/gencay-strata/agent-strata
+- **Hosting**: Vercel
+- **Repos**:
+  - **Production (StrataScratch)**: https://github.com/stratascratch/ai-agents/tree/master/mock-interview
+  - **Development (Personal)**: https://github.com/gencay-strata/agent-strata
 
 ## Project Structure
 ```
@@ -152,9 +155,34 @@ vercel dev         # frontend + serverless functions
 ```
 
 ## Deployment
+
+### Push to Production (StrataScratch Repo)
+**IMPORTANT**: Always push to StrataScratch repo, NOT personal repo!
 ```bash
+# From /Users/learnai/Desktop/agent-strata (development folder)
+# 1. Make changes and test locally
+
+# 2. Copy files to StrataScratch repo (DON'T clone new, use existing!)
+cd /Users/learnai/Desktop/ai-agents
+git pull origin master  # Update first
+
+# 3. Copy modified files from agent-strata to ai-agents/mock-interview/
+cp /Users/learnai/Desktop/agent-strata/mock-interview-system/[modified-file] /Users/learnai/Desktop/ai-agents/mock-interview/
+
+# 4. Commit and push
+cd /Users/learnai/Desktop/ai-agents
+git add mock-interview/[modified-files]
+git commit -m "description"
+git push origin master  # Push to StrataScratch repo
+
+# Git config should be: mehmet@stratascratch.com (already set)
+```
+
+### Push to Personal Repo (Optional - for backup only)
+```bash
+cd /Users/learnai/Desktop/agent-strata
 git add . && git commit -m "message"
-git push origin main   # Vercel auto-deploys
+git push origin main
 ```
 
 ## Team
@@ -165,11 +193,14 @@ git push origin main   # Vercel auto-deploys
 - **Maks** - GCP/Infrastructure (service account key owner)
 
 ## Resources
-- GitHub: https://github.com/gencay-strata/agent-strata
-- OpenAI Agent Builder: https://platform.openai.com/playground/agents
-- Clerk Dashboard: https://dashboard.clerk.com
-- GCP Project: https://console.cloud.google.com (aispace-482111)
-- Local path: /Users/learnai/Desktop/agent-strata
+- **GitHub (Production)**: https://github.com/stratascratch/ai-agents/tree/master/mock-interview
+- **GitHub (Dev/Backup)**: https://github.com/gencay-strata/agent-strata
+- **OpenAI Agent Builder**: https://platform.openai.com/playground/agents
+- **Clerk Dashboard**: https://dashboard.clerk.com
+- **GCP Project**: https://console.cloud.google.com (aispace-482111)
+- **Local Paths**:
+  - Production repo: `/Users/learnai/Desktop/ai-agents` (push here!)
+  - Development folder: `/Users/learnai/Desktop/agent-strata`
 
 ## Recent Changes
 1. Integrated Vertex AI (Gemini 3 Pro) as primary agent provider
