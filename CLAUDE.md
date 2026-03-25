@@ -197,6 +197,16 @@ git push origin main   # Vercel auto-deploys
    - `api/run-code.js`: Parse `content[0].text` for execution results
    - `api/check-solution.js`: Parse `content[0].text` + extract numeric score
    - All endpoints return clean JSON (not wrapped in MCP response structure)
+13. **Moved final score calculation from AI to backend (March 25, 2026):**
+   - **Problem**: AI agent made arithmetic errors calculating final score (e.g., Logic=75, Output=47 → returned 54 instead of 68)
+   - **Root cause**: LLMs are non-deterministic and unreliable at math, even with explicit calculation instructions
+   - **Solution**: AI only evaluates Logic score (0-100), backend calculates final score with guaranteed accuracy
+   - **Flow**: MCP → OUTPUT score (0-100) → AI → LOGIC score (0-100) → Backend → `finalScore = (logic × 0.75) + (output × 0.25)`
+   - **Files modified**:
+     - `server/agentClient.js`: Removed Step 3 (calculation) from AI prompt, added `parseSubmissionScores()` function
+     - `api/agent-message.js`: Added MCP call + backend calculation for submit action
+     - `src/pages/InterviewSession.jsx`: Updated to handle structured response `{logicScore, outputScore, finalScore, explanation}`
+   - **Result**: Scores are now mathematically accurate, AI focuses on code evaluation (its strength)
 
 ## Known Issues & TODOs
 - [x] ~~Vercel deployment for Vertex AI~~ - **RESOLVED**: Production deployed successfully

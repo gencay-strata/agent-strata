@@ -143,21 +143,17 @@ Assign logic_score (0-100):
 - 30-49: Fundamental issues with approach
 - 0-29: Misunderstood problem or very poor logic
 
-**Step 3: Calculate FINAL score**
-final_score = (logic_score × 0.75) + (output_score × 0.25)
+**Step 3: Return structured response**
 
-**MATH RULES:** Use precise arithmetic - multiply first, then add.
-Example: Logic=70, Output=40 → (70×0.75)=52.5, (40×0.25)=10, 52.5+10=62.5 (NOT 55!)
-
-**Step 4: Return structured response**
+IMPORTANT: Do NOT calculate final score. Backend will combine logic + output scores.
 
 Format:
-**📊 Final Score: [final_score]/100**
+LOGIC_SCORE: [0-100]
 
-**💡 Logic Score: [logic_score]/100 (75% weight)**
+**💡 Logic Analysis:**
 [Explanation: What they did well + what needs improvement]
 
-**✅ Output Score: [output_score]/100 (25% weight)**
+**✅ Output Status: [output_score]/100**
 [✅ Correct result | ❌ Incorrect result]
 
 ---
@@ -166,12 +162,12 @@ Format:
 [Specific feedback WITHOUT revealing solution]
 
 Example (correct output, good logic):
-**📊 Final Score: 95/100**
+LOGIC_SCORE: 93
 
-**💡 Logic Score: 93/100 (75% weight)**
+**💡 Logic Analysis:**
 Excellent use of LEFT JOIN to include all customers. Clean query structure with proper aliasing. Efficient solution.
 
-**✅ Output Score: 100/100 (25% weight)**
+**✅ Output Status: 100/100**
 ✅ Correct result - all rows and columns match expected output.
 
 ---
@@ -180,12 +176,12 @@ Excellent use of LEFT JOIN to include all customers. Clean query structure with 
 Perfect! Ready for next question?
 
 Example (incorrect output, decent logic):
-**📊 Final Score: 58/100**
+LOGIC_SCORE: 70
 
-**💡 Logic Score: 70/100 (75% weight)**
+**💡 Logic Analysis:**
 Good approach using JOINs, but missing edge case for customers with zero orders. Consider using LEFT JOIN instead of INNER JOIN.
 
-**✅ Output Score: 10/100 (25% weight)**
+**✅ Output Status: 10/100**
 ❌ Incorrect result - returns 12 rows, expected 15. Missing customers with no orders.
 
 ---
@@ -403,6 +399,38 @@ export async function callInterviewAgent({ message, context }) {
     console.error('❌ Agent call failed:', error);
     throw error;
   }
+}
+
+/**
+ * Parse Logic score from AI response and calculate final score
+ * @param {string} aiResponse - AI agent's response text
+ * @param {number} outputScore - Output score from MCP (0-100)
+ * @returns {object} - {logicScore, outputScore, finalScore, explanation}
+ */
+export function parseSubmissionScores(aiResponse, outputScore) {
+  console.log('[PARSE SCORES] Parsing AI response for logic score...');
+
+  // Extract logic score from AI response (format: "LOGIC_SCORE: 75")
+  const logicMatch = aiResponse.match(/LOGIC_SCORE:\s*(\d+)/i);
+  const logicScore = logicMatch ? parseInt(logicMatch[1]) : 75; // fallback to 75
+
+  if (!logicMatch) {
+    console.warn('[PARSE SCORES] ⚠️ Could not parse LOGIC_SCORE, using fallback: 75');
+  } else {
+    console.log(`[PARSE SCORES] ✅ Extracted Logic Score: ${logicScore}`);
+  }
+
+  // Calculate final score: 75% logic + 25% output
+  const finalScore = Math.round((logicScore * 0.75) + (outputScore * 0.25));
+
+  console.log(`[PARSE SCORES] 📊 Final calculation: (${logicScore} × 0.75) + (${outputScore} × 0.25) = ${finalScore}`);
+
+  return {
+    logicScore,
+    outputScore,
+    finalScore,
+    explanation: aiResponse // full markdown response
+  };
 }
 
 function buildAgentMessage(message, context) {

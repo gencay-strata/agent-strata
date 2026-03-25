@@ -481,9 +481,89 @@ const InterviewSession = () => {
 
       // Check if agent response is a string (formatted text) or object (structured data)
       const isAgentText = typeof agentResponse === 'string';
+      const isStructuredResponse = typeof agentResponse === 'object' && agentResponse.finalScore !== undefined;
 
-      if (isAgentText) {
-        // Agent returned formatted markdown text - use it directly
+      if (isStructuredResponse) {
+        // NEW FORMAT: Backend calculated scores (from /api/agent-message)
+        // agentResponse = {logicScore, outputScore, finalScore, explanation, isCorrect}
+        const resultMessage = {
+          role: 'assistant',
+          content: agentResponse.explanation,
+          timestamp: new Date()
+        };
+
+        setChatMessages(prev => [...prev, resultMessage]);
+
+        // Extract explanations from markdown response
+        const logicExplanation = (() => {
+          const match = agentResponse.explanation.match(/Logic Analysis:.*?\n([\s\S]*?)(?=\n\*\*|$)/);
+          return match ? match[1].trim() : '';
+        })();
+
+        const outputExplanation = (() => {
+          const match = agentResponse.explanation.match(/Output Status:.*?\n([\s\S]*?)(?=\n---|$)/);
+          return match ? match[1].trim() : '';
+        })();
+
+        const submission = {
+          questionId: questions[currentQuestionIndex].id,
+          code,
+          result: {
+            feedback: agentResponse.explanation,
+            correct: agentResponse.isCorrect,
+            score: agentResponse.finalScore, // Backend-calculated (accurate!)
+            finalScore: agentResponse.finalScore,
+            logicScore: agentResponse.logicScore,
+            outputScore: agentResponse.outputScore,
+            logicExplanation,
+            outputExplanation
+          },
+          timestamp: new Date()
+        };
+
+        // Update submissions state
+        setSubmissions(prev => {
+          const idx = prev.findIndex(s => s.questionId === submission.questionId);
+          if (idx >= 0) {
+            const updated = [...prev];
+            updated[idx] = submission;
+            return updated;
+          }
+          return [...prev, submission];
+        });
+
+        // Build latest submissions for navigation
+        const latestSubmissions = (() => {
+          const idx = submissions.findIndex(s => s.questionId === submission.questionId);
+          if (idx >= 0) {
+            const updated = [...submissions];
+            updated[idx] = submission;
+            return updated;
+          }
+          return [...submissions, submission];
+        })();
+
+        // Move to next question after submission
+        if (currentQuestionIndex < questions.length - 1) {
+          setTimeout(() => {
+            setCurrentQuestionIndex(prev => prev + 1);
+          }, 2000);
+        } else {
+          // Last question - navigate to results
+          setTimeout(() => {
+            navigate('/results', {
+              state: {
+                questions,
+                submissions: latestSubmissions,
+                filters,
+                totalDuration
+              }
+            });
+          }, 2000);
+        }
+
+      } else if (isAgentText) {
+        // LEGACY FORMAT: Agent returned formatted markdown text (old flow)
         const resultMessage = {
           role: 'assistant',
           content: agentResponse,
@@ -492,24 +572,25 @@ const InterviewSession = () => {
 
         setChatMessages(prev => [...prev, resultMessage]);
 
-        // Extract NEW scores from agent's response (75% logic + 25% output = final)
-        const finalScoreMatch = agentResponse.match(/Final Score:\s*([\d.]+)\/100/i);
-        const logicScoreMatch = agentResponse.match(/Logic Score:\s*([\d.]+)\/100/i);
-        const outputScoreMatch = agentResponse.match(/Output Score:\s*([\d.]+)\/100/i);
+        // Extract scores from agent's response (may have calculation errors!)
+        const logicScoreMatch = agentResponse.match(/LOGIC_SCORE:\s*(\d+)/i);
+        const outputScoreMatch = agentResponse.match(/Output Status:\s*([\d.]+)\/100/i);
 
-        const finalScore = finalScoreMatch ? Math.round(parseFloat(finalScoreMatch[1])) : 0;
-        const logicScore = logicScoreMatch ? Math.round(parseFloat(logicScoreMatch[1])) : 0;
+        const logicScore = logicScoreMatch ? parseInt(logicScoreMatch[1]) : 75;
         const outputScore = outputScoreMatch ? Math.round(parseFloat(outputScoreMatch[1])) : 0;
-        const isCorrect = finalScore >= 90; // Consider 90+ as "correct"
+
+        // Calculate final score on frontend (fallback if backend doesn't calculate)
+        const finalScore = Math.round((logicScore * 0.75) + (outputScore * 0.25));
+        const isCorrect = finalScore >= 90;
 
         // Extract explanations
         const logicExplanation = (() => {
-          const match = agentResponse.match(/Logic Score:.*?\n([\s\S]*?)(?=\n\*\*|$)/);
+          const match = agentResponse.match(/Logic Analysis:.*?\n([\s\S]*?)(?=\n\*\*|$)/);
           return match ? match[1].trim() : '';
         })();
 
         const outputExplanation = (() => {
-          const match = agentResponse.match(/Output Score:.*?\n([\s\S]*?)(?=\n---|$)/);
+          const match = agentResponse.match(/Output Status:.*?\n([\s\S]*?)(?=\n---|$)/);
           return match ? match[1].trim() : '';
         })();
 
@@ -519,7 +600,7 @@ const InterviewSession = () => {
           result: {
             feedback: agentResponse,
             correct: isCorrect,
-            score: finalScore, // Legacy field (for backwards compatibility)
+            score: finalScore,
             finalScore,
             logicScore,
             outputScore,
